@@ -2,6 +2,10 @@
 
 A simple, free invoice generator for Stripe one-time payments built with Next.js. This project was born out of frustration with having to manually create invoices for Stripe payments and not wanting to pay for external services so I pretty much vibe coded this with Claude Code inspired by [@levelsio's Stripe invoice generator](https://gist.github.com/levelsio/b30721cc99166223fcf3dd590d6d0454).
 
+## Demo
+
+[![Watch the video](https://img.youtube.com/vi/C_hKSgCNy-U/0.jpg)](https://youtu.be/C_hKSgCNy-U)
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Features
@@ -18,10 +22,10 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ```bash
 # Clone the repository
-git clone https://github.com/sunergos-ro/stripe-invoice-generator.git
+git clone https://github.com/sunergos-ro/invoice-generator.git
 
 # Navigate to the project directory
-cd stripe-invoice-generator
+cd invoice-generator
 
 # Install dependencies
 npm install
