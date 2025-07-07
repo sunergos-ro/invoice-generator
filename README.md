@@ -6,8 +6,6 @@ A simple, free invoice generator for Stripe one-time payments built with Next.js
 
 [![Watch the video](https://img.youtube.com/vi/C_hKSgCNy-U/0.jpg)](https://youtu.be/C_hKSgCNy-U)
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 ## Features
 
 - **No Backend Required**: Runs entirely in your browser
