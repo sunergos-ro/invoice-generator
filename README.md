@@ -17,6 +17,11 @@ A simple, free invoice generator for Stripe one-time payments built with Next.js
 - **Print to PDF**: Generate professional PDFs using your browser's print function
 - **Customizable**: Add your company logo and details
 - **Real-time Preview**: See your invoice update as you type
+- **EU VAT Support**: Automatic VAT calculation and reverse-charge handling for EU businesses
+- **Multiple Line Items**: Add multiple products/services to your invoice
+- **Country Selection**: Built-in country dropdown with all global countries
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Clean Print Layout**: Optimized print styles for professional PDF output
 
 ## Getting Started
 
@@ -40,11 +45,14 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Usage
 
-1. **Enter Invoice Details**: Fill in the receipt number and dates
-2. **Add Customer Information**: Enter your customer's name, email, and address
-3. **Specify Payment Details**: Add the amount paid and payment method details
-4. **Describe the Item**: Enter a description of the service or product
-5. **Additional Fields**: Optionally add custom fields like VAT numbers
+1. **Company Setup**: Select your company's country and add your logo (or choose from presets)
+2. **Invoice Details**: Set invoice number, issue date, and due date
+3. **Customer Information**: Add customer details including country and VAT number (for EU businesses)
+4. **Add Line Items**: Add one or more products/services with quantities and prices
+5. **VAT Handling**: 
+   - Automatic VAT calculation based on EU rules
+   - B2B reverse-charge support for cross-border EU transactions
+   - Smart detection of when VAT should apply
 6. **Print/Export**: Click "Print / Export as PDF" to generate your invoice
 
 The application automatically saves your inputs to localStorage, so your data persists between sessions.
@@ -52,9 +60,11 @@ The application automatically saves your inputs to localStorage, so your data pe
 ### Customization
 
 You can customize the invoice by:
-- Selecting different company logos from the dropdown
+- Selecting different company logos from the dropdown or providing a custom URL
 - Modifying the default company details in the code
 - Adding new logo options in the `public` folder
+- Adjusting the invoice layout and styling in `src/app/page.tsx`
+- Customizing the print styles for PDF generation
 
 ## Development
 
@@ -88,6 +98,21 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
+
+## Key Features Explained
+
+### EU VAT Support
+The invoice generator includes comprehensive EU VAT handling:
+- **Automatic VAT Rates**: All 27 EU member states with their current standard VAT rates
+- **B2B Reverse Charge**: Automatically applies reverse charge for cross-border B2B transactions within the EU
+- **B2C VAT**: Correctly applies company country VAT for B2C transactions
+- **Smart Detection**: Automatically determines when VAT should apply based on countries and VAT numbers
+
+### Multiple Line Items
+- Add unlimited products or services to your invoice
+- Each item can have its own description, quantity, and unit price
+- Real-time calculation of subtotals and totals
+- Easy-to-use interface for managing invoice items
 
 ## Acknowledgments
 
