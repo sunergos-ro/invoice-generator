@@ -1,672 +1,513 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, FC } from "react";
 import Image from "next/image";
+import { countries } from "countries-list";
 
-interface InvoiceData {
-  // Invoice details
-  receiptNumber: string;
-  issueDate: string;
-  paidDate: string;
-  
-  // Company details
-  companyLogoUrl: string;
-  companyName: string;
-  companyAddress: {
-    street: string;
-    city: string;
-    postalCode: string;
-    country: string;
-    registrationNumber: string;
-  };
-  
-  // Customer details
-  customerName: string;
-  customerEmail: string;
-  customerAddress: {
-    line1: string;
-    line2: string;
-    postalCode: string;
-    state: string;
-    city: string;
-    country: string;
-  };
-  
-  // Custom field
-  customFieldName: string;
-  customFieldValue: string;
-  
-  // Payment details
-  amountPaid: number;
-  paymentBrand: string;
-  paymentLast4: string;
-  
-  // Invoice item
-  itemDescription: string;
-  
-  // Contact
-  contactEmail: string;
+const EU_VAT_RATES: Record<string, { standard: number; countryCode: string }> = {
+  "AT": { standard: 20, countryCode: "AT" }, // Austria
+  "BE": { standard: 21, countryCode: "BE" }, // Belgium
+  "BG": { standard: 20, countryCode: "BG" }, // Bulgaria
+  "HR": { standard: 25, countryCode: "HR" }, // Croatia
+  "CY": { standard: 19, countryCode: "CY" }, // Cyprus
+  "CZ": { standard: 21, countryCode: "CZ" }, // Czech Republic
+  "DK": { standard: 25, countryCode: "DK" }, // Denmark
+  "EE": { standard: 22, countryCode: "EE" }, // Estonia
+  "FI": { standard: 25.5, countryCode: "FI" }, // Finland
+  "FR": { standard: 20, countryCode: "FR" }, // France
+  "DE": { standard: 19, countryCode: "DE" }, // Germany
+  "GR": { standard: 24, countryCode: "GR" }, // Greece
+  "HU": { standard: 27, countryCode: "HU" }, // Hungary
+  "IE": { standard: 23, countryCode: "IE" }, // Ireland
+  "IT": { standard: 22, countryCode: "IT" }, // Italy
+  "LV": { standard: 21, countryCode: "LV" }, // Latvia
+  "LT": { standard: 21, countryCode: "LT" }, // Lithuania
+  "LU": { standard: 17, countryCode: "LU" }, // Luxembourg
+  "MT": { standard: 18, countryCode: "MT" }, // Malta
+  "NL": { standard: 21, countryCode: "NL" }, // Netherlands
+  "PL": { standard: 23, countryCode: "PL" }, // Poland
+  "PT": { standard: 23, countryCode: "PT" }, // Portugal
+  "RO": { standard: 19, countryCode: "RO" }, // Romania
+  "SK": { standard: 23, countryCode: "SK" }, // Slovakia
+  "SI": { standard: 22, countryCode: "SI" }, // Slovenia
+  "ES": { standard: 21, countryCode: "ES" }, // Spain
+  "SE": { standard: 25, countryCode: "SE" }, // Sweden
+};
+
+const EU_COUNTRY_CODES = Object.keys(EU_VAT_RATES);
+
+const getCountryList = () => {
+  return Object.entries(countries)
+    .map(([code, data]) => ({ code, name: data.name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+};
+
+const isValidImageUrl = (url: string): boolean => {
+  if (!url) return false;
+  if (url.startsWith('/')) return true; // local paths are valid
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
 }
 
+interface InvoiceData {
+  invoiceNumber: string;
+  issueDate: string;
+  dueDate: string;
+  
+  companyLogoUrl: string;
+  companyName: string;
+  companyAddress: string;
+  companyCountry: string;
+  
+  customerName: string;
+  customerAddress: string;
+  customerCountry: string;
+  customerVat: string;
+
+  items: InvoiceItem[];
+  
+  isReverseCharge: boolean;
+  
+  notes: string;
+}
+
+interface EditableFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+  isTextarea?: boolean;
+}
+
+const EditableField: FC<EditableFieldProps> = ({ value, onChange, placeholder, className, isTextarea = false }) => {
+  const commonProps = {
+    value,
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(e.target.value),
+    placeholder,
+    className: `text-gray-800 placeholder-gray-400 bg-transparent focus:bg-gray-100 p-1 -m-1 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors ${className}`
+  };
+
+  return isTextarea ? <textarea {...commonProps} rows={4} /> : <input type="text" {...commonProps} />;
+};
+
+const defaultInvoiceData: InvoiceData = {
+  invoiceNumber: "0001",
+  issueDate: new Date().toISOString().split('T')[0],
+  dueDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0],
+  companyLogoUrl: "/git-digest-logo.png",
+  companyName: "Sunergos IT LLC",
+  companyAddress: "Martir Marius Ciopec 18\nsc. C, et. 3, ap. 16\n300732 Timisoara\nsupport@gitdigest.ai",
+  companyCountry: "RO",
+  customerName: "Acme Inc.",
+  customerAddress: "123 Main St\nManhattan, NY 10001\njdoe@acme.com",
+  customerCountry: "US",
+  customerVat: "",
+  items: [
+    { id: "1", description: "Lifetime access to Git Digest", quantity: 1, unitPrice: 500.00 },
+  ],
+  isReverseCharge: true,
+  notes: "",
+};
+
 export default function Home() {
-  const [invoiceData, setInvoiceData] = useState<InvoiceData>(() => {
-    // Load from localStorage on mount
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('invoiceData');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          console.error('Failed to load saved invoice data:', e);
-        }
-      }
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const countryList = useMemo(() => getCountryList(), []);
+
+  const isEUCustomer = useMemo(() => {
+    if (!invoiceData?.customerCountry) return false;
+    return EU_COUNTRY_CODES.includes(invoiceData.customerCountry);
+  }, [invoiceData?.customerCountry]);
+
+  const isEUCompany = useMemo(() => {
+    if (!invoiceData?.companyCountry) return false;
+    return EU_COUNTRY_CODES.includes(invoiceData.companyCountry);
+  }, [invoiceData?.companyCountry]);
+
+  const shouldApplyVAT = useMemo(() => {
+    if (!invoiceData) return false;
+    
+    // B2C: EU company selling to EU customer - always apply VAT of the company's country
+    if (isEUCompany && isEUCustomer && !invoiceData.customerVat) {
+      return true;
     }
     
-    // Default values if no saved data
-    return {
-      receiptNumber: "",
-      issueDate: new Date().toISOString().split("T")[0],
-      paidDate: new Date().toISOString().split("T")[0],
-      companyLogoUrl: "/default-logo.svg",
-      companyName: "Sunergos IT LLC",
-      companyAddress: {
-        street: "Martir Marius Ciopec 18C, apt. 16",
-        city: "Timisoara, Timis",
-        postalCode: "300737",
-        registrationNumber: "RO38045891",
-      },
-      customerName: "",
-      customerEmail: "",
-      customerAddress: {
-        line1: "",
-        line2: "",
-        postalCode: "",
-        state: "",
-        city: "",
-        country: "",
-      },
-      customFieldName: "",
-      customFieldValue: "",
-      amountPaid: 0,
-      paymentBrand: "",
-      paymentLast4: "",
-      itemDescription: "",
-      contactEmail: "",
-    };
-  });
+    // B2B: EU company selling to EU business with VAT number - reverse charge
+    if (isEUCompany && isEUCustomer && invoiceData.customerVat && invoiceData.customerCountry !== invoiceData.companyCountry) {
+      return false; // Reverse charge applies
+    }
+    
+    // B2B: Same country - always apply VAT
+    if (isEUCompany && isEUCustomer && invoiceData.customerCountry === invoiceData.companyCountry) {
+      return true;
+    }
+    
+    // Non-EU sales - no VAT
+    return false;
+  }, [invoiceData, isEUCompany, isEUCustomer]);
 
-  const handleInputChange = (field: string, value: string | number) => {
-    if (field.includes(".")) {
-      const [parent, child] = field.split(".");
-      setInvoiceData({
-        ...invoiceData,
-        [parent]: {
-          ...(invoiceData[parent as keyof InvoiceData] as Record<string, string | number>),
-          [child]: value,
-        },
-      });
+  const getApplicableVATRate = useMemo(() => {
+    if (!invoiceData || !shouldApplyVAT) return 0;
+    
+    // Use company's country VAT rate
+    if (isEUCompany && EU_VAT_RATES[invoiceData.companyCountry]) {
+      return EU_VAT_RATES[invoiceData.companyCountry].standard;
+    }
+    
+    return 0;
+  }, [invoiceData, isEUCompany, shouldApplyVAT]);
+
+  // Load data from localStorage on client-side mount
+  useEffect(() => {
+    const saved = localStorage.getItem('invoiceData');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.items) {
+          setInvoiceData(parsed);
+          return;
+        }
+      } catch (e) {
+        console.error('Failed to load saved invoice data:', e);
+      }
+    }
+    setInvoiceData(defaultInvoiceData);
+  }, []);
+
+  const handleInputChange = (field: keyof InvoiceData, value: string | boolean) => {
+    if (!invoiceData) return;
+    
+    // Handle reverse charge logic for notes
+    if (field === 'isReverseCharge') {
+      const newNotes = value 
+        ? "Tax to be paid on a reverse-charge basis"
+        : "";
+      setInvoiceData(prev => prev ? ({ 
+        ...prev, 
+        [field]: value as boolean,
+        notes: newNotes
+      }) : null);
+    } else if (field === 'customerCountry' || field === 'companyCountry' || field === 'customerVat') {
+      // Update reverse charge status based on new country/VAT selection
+      const updates: Partial<InvoiceData> = { [field]: value };
+      const newData = { ...invoiceData, ...updates };
+      
+      // Check if reverse charge should apply
+      const isEUCompanyCheck = EU_COUNTRY_CODES.includes(field === 'companyCountry' ? value as string : newData.companyCountry);
+      const isEUCustomerCheck = EU_COUNTRY_CODES.includes(field === 'customerCountry' ? value as string : newData.customerCountry);
+      const hasVat = field === 'customerVat' ? !!value : !!newData.customerVat;
+      const differentCountries = newData.companyCountry !== newData.customerCountry;
+      
+      // B2B cross-border EU transaction with VAT number = reverse charge
+      const shouldReverseCharge = isEUCompanyCheck && isEUCustomerCheck && hasVat && differentCountries;
+      
+      updates.isReverseCharge = shouldReverseCharge;
+      if (shouldReverseCharge) {
+        updates.notes = "Tax to be paid on a reverse-charge basis";
+      } else if (invoiceData.notes === "Tax to be paid on a reverse-charge basis") {
+        updates.notes = "";
+      }
+      
+      setInvoiceData(prev => prev ? ({ ...prev, ...updates }) : null);
     } else {
-      setInvoiceData({ ...invoiceData, [field]: value });
+      setInvoiceData(prev => prev ? ({ ...prev, [field]: value }) : null);
     }
   };
 
-  const handlePrint = () => window.print();
+  const handleItemChange = (itemId: string, field: keyof InvoiceItem, value: string | number) => {
+    if (!invoiceData) return;
+    setInvoiceData(prev => prev ? ({
+      ...prev,
+      items: prev.items.map(item =>
+        item.id === itemId ? { ...item, [field]: value } : item
+      )
+    }) : null);
+  };
+
+  const addItem = () => {
+    if (!invoiceData) return;
+    setInvoiceData(prev => prev ? ({
+      ...prev,
+      items: [...prev.items, { id: Date.now().toString(), description: "", quantity: 1, unitPrice: 0 }]
+    }) : null);
+  }
+
+  const removeItem = (itemId: string) => {
+    if (!invoiceData) return;
+    setInvoiceData(prev => prev ? ({
+      ...prev,
+      items: prev.items.filter(item => item.id !== itemId)
+    }) : null);
+  }
 
   // Save to localStorage whenever invoiceData changes
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (invoiceData) {
       localStorage.setItem('invoiceData', JSON.stringify(invoiceData));
     }
   }, [invoiceData]);
 
-  useEffect(() => {
-    handleInputChange("paidDate", invoiceData.issueDate);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [invoiceData.issueDate]);
+  const { subtotal, taxAmount, total, taxRate } = useMemo(() => {
+    if (!invoiceData) return { subtotal: 0, taxAmount: 0, total: 0, taxRate: 0 };
+    const subtotal = invoiceData.items.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
+    
+    const taxRate = shouldApplyVAT ? getApplicableVATRate : 0;
+    const taxAmount = subtotal * (taxRate / 100);
+    const total = subtotal + taxAmount;
+    return { subtotal, taxAmount, total, taxRate };
+  }, [invoiceData, shouldApplyVAT, getApplicableVATRate]);
+
+
+  const handlePrint = () => window.print();
+
+  if (!invoiceData) {
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>;
+  }
+  
+  const isCustomLogo = ![
+    "/git-digest-logo.png",
+    "/default-logo.svg",
+    ""
+  ].includes(invoiceData.companyLogoUrl);
 
   return (
     <>
       <style jsx global>{`
         @media print {
-          .no-print {
-            display: none !important;
-          }
-          .print-only {
-            display: block !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            background: white !important;
-            z-index: 9999 !important;
-            margin: 0 !important;
-            padding: 14px !important;
-          }
-          .invoice-content {
-            max-width: none !important;
-            box-shadow: none !important;
-            border: none !important;
-            transform: none !important;
-            margin: 0 !important;
-          }
-          body {
-            background: #fff !important;
+          .no-print { display: none !important; }
+          body { background: #fff !important; }
+          .invoice-container {
+             box-shadow: none !important;
+             margin: 0 !important;
+             max-width: 100% !important;
+             border: none !important;
           }
         }
-        @media screen {
-          .print-only {
-            display: none;
-          }
+        .editable-textarea {
+          white-space: pre-wrap;
+          resize: none;
         }
       `}</style>
-
-      <div className="min-h-screen bg-gray-50 py-4 sm:py-8 no-print">
-        <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-8 text-center">Invoice Generator</h1>
-          
-          <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
-            {/* Form Section */}
-            <div className="w-full lg:flex-1 bg-white rounded-lg shadow-md p-4 sm:p-6 lg:max-h-[calc(100vh-200px)] overflow-y-auto">
-              <form className="space-y-6">
-                {/* Invoice Details */}
-                <div className="border-b pb-4">
-                  <h2 className="text-lg font-semibold mb-3">Invoice Details</h2>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Receipt Number</label>
-                      <input
-                        type="text"
-                        value={invoiceData.receiptNumber}
-                        onChange={(e) => handleInputChange("receiptNumber", e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md"
-                        placeholder="INV-001"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Issue Date</label>
-                        <input
-                          type="date"
-                          value={invoiceData.issueDate}
-                          onChange={(e) => handleInputChange("issueDate", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Paid Date</label>
-                        <input
-                          type="date"
-                          value={invoiceData.paidDate}
-                          onChange={(e) => handleInputChange("paidDate", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Company Details */}
-                <div className="border-b pb-4">
-                  <h2 className="text-lg font-semibold mb-3">Company Details</h2>
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Company Logo</label>
-                        <select
-                          value={invoiceData.companyLogoUrl === "/default-logo.svg" || invoiceData.companyLogoUrl === "/git-digest-logo.png" ? invoiceData.companyLogoUrl : "custom"}
-                          onChange={(e) => {
-                            if (e.target.value === "custom") {
-                              handleInputChange("companyLogoUrl", "");
-                            } else {
-                              handleInputChange("companyLogoUrl", e.target.value);
-                            }
-                          }}
-                          className="w-full px-3 py-2 border rounded-md"
-                        >
-                          <option value="/default-logo.svg">Sunergos (Default)</option>
-                          <option value="/git-digest-logo.png">Git Digest</option>
-                          <option value="custom">Custom URL</option>
-                        </select>
-                        {(invoiceData.companyLogoUrl !== "/default-logo.svg" && invoiceData.companyLogoUrl !== "/git-digest-logo.png") && (
-                          <input
-                            type="url"
-                            value={invoiceData.companyLogoUrl}
-                            onChange={(e) => handleInputChange("companyLogoUrl", e.target.value)}
-                            className="w-full px-3 py-2 border rounded-md mt-2"
-                            placeholder="Enter custom logo URL"
-                          />
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Company Name</label>
-                        <input
-                          type="text"
-                          value={invoiceData.companyName}
-                          onChange={(e) => handleInputChange("companyName", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                          placeholder="Sunergos IT LLC"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Company Address</label>
-                        <input
-                          type="text"
-                          value={invoiceData.companyAddress.street}
-                          onChange={(e) => handleInputChange("companyAddress.street", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                          placeholder="123 Main St"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">City</label>
-                        <input
-                          type="text"
-                          value={invoiceData.companyAddress.city}
-                          onChange={(e) => handleInputChange("companyAddress.city", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                          placeholder="New York"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Postal Code</label>
-                        <input
-                          type="text"
-                          value={invoiceData.companyAddress.postalCode}
-                          onChange={(e) => handleInputChange("companyAddress.postalCode", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                          placeholder="10001"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Country</label>
-                        <input
-                          type="text"
-                          value={invoiceData.companyAddress.country}
-                          onChange={(e) => handleInputChange("companyAddress.country", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Customer Details */}
-                <div className="border-b pb-4">
-                  <h2 className="text-lg font-semibold mb-3">Customer Details</h2>
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Customer Name</label>
-                        <input
-                          type="text"
-                          value={invoiceData.customerName}
-                          onChange={(e) => handleInputChange("customerName", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                          placeholder="John Doe"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Customer Email</label>
-                        <input
-                          type="email"
-                          value={invoiceData.customerEmail}
-                          onChange={(e) => handleInputChange("customerEmail", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                          placeholder="john@example.com"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Address Line 1</label>
-                        <input
-                          type="text"
-                          value={invoiceData.customerAddress.line1}
-                          onChange={(e) => handleInputChange("customerAddress.line1", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Address Line 2</label>
-                        <input
-                          type="text"
-                          value={invoiceData.customerAddress.line2}
-                          onChange={(e) => handleInputChange("customerAddress.line2", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">City</label>
-                        <input
-                          type="text"
-                          value={invoiceData.customerAddress.city}
-                          onChange={(e) => handleInputChange("customerAddress.city", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">State</label>
-                        <input
-                          type="text"
-                          value={invoiceData.customerAddress.state}
-                          onChange={(e) => handleInputChange("customerAddress.state", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Postal Code</label>
-                        <input
-                          type="text"
-                          value={invoiceData.customerAddress.postalCode}
-                          onChange={(e) => handleInputChange("customerAddress.postalCode", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Country</label>
-                        <input
-                          type="text"
-                          value={invoiceData.customerAddress.country}
-                          onChange={(e) => handleInputChange("customerAddress.country", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Details */}
-                <div className="border-b pb-4">
-                  <h2 className="text-lg font-semibold mb-3">Payment Details</h2>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Amount Paid (USD)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={invoiceData.amountPaid}
-                        onChange={(e) => handleInputChange("amountPaid", parseFloat(e.target.value) || 0)}
-                        className="w-full px-3 py-2 border rounded-md"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Payment Brand</label>
-                        <input
-                          type="text"
-                          value={invoiceData.paymentBrand}
-                          onChange={(e) => handleInputChange("paymentBrand", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                          placeholder="Visa"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Last 4 Digits</label>
-                        <input
-                          type="text"
-                          maxLength={4}
-                          value={invoiceData.paymentLast4}
-                          onChange={(e) => handleInputChange("paymentLast4", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                          placeholder="1234"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Invoice Item */}
-                <div className="border-b pb-4">
-                  <h2 className="text-lg font-semibold mb-3">Invoice Item</h2>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Item Description</label>
-                    <textarea
-                      value={invoiceData.itemDescription}
-                      onChange={(e) => handleInputChange("itemDescription", e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md"
-                      rows={3}
-                      placeholder="Service or product description"
-                    />
-                  </div>
-                </div>
-
-                {/* Additional Fields */}
-                <div className="pb-4">
-                  <h2 className="text-lg font-semibold mb-3">Additional Information</h2>
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Custom Field Name</label>
-                        <input
-                          type="text"
-                          value={invoiceData.customFieldName}
-                          onChange={(e) => handleInputChange("customFieldName", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                          placeholder="VAT Number"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Custom Field Value</label>
-                        <input
-                          type="text"
-                          value={invoiceData.customFieldValue}
-                          onChange={(e) => handleInputChange("customFieldValue", e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
-                          placeholder="GB123456789"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Contact Email</label>
-                      <input
-                        type="email"
-                        value={invoiceData.contactEmail}
-                        onChange={(e) => handleInputChange("contactEmail", e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md"
-                        placeholder="support@example.com"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4">
-                  <button
-                    type="button"
-                    onClick={handlePrint}
-                    className="w-full bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors"
-                  >
-                    Print / Export as PDF
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Preview Section - Hidden on mobile */}
-            <div className="hidden lg:block lg:flex-1 bg-gray-100 rounded-lg shadow-md p-4 overflow-hidden">
-              <h2 className="text-lg font-semibold mb-3 text-center">Invoice Preview</h2>
-              <div className="bg-gray-600 p-4 overflow-auto max-h-[calc(100vh-280px)]">
-                <div className="invoice-content max-w-[600px] mx-auto bg-white p-10 shadow-lg transform scale-75 origin-top">
-                  <InvoicePreview data={invoiceData} />
-                </div>
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {/* --- CONTROLS --- */}
+          <div className="no-print mb-8 p-6 bg-white rounded-lg shadow-md border border-gray-200">
+             <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Invoice Generator</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">Company Logo</label>
+                <select
+                  value={isCustomLogo ? "custom" : invoiceData.companyLogoUrl}
+                  onChange={(e) => {
+                    if (e.target.value === "custom") {
+                      handleInputChange("companyLogoUrl", "https://");
+                    } else {
+                      handleInputChange("companyLogoUrl", e.target.value);
+                    }
+                  }}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                >
+                  <option value="/git-digest-logo.png">Git Digest</option>
+                  <option value="/default-logo.svg">Sunergos (Default)</option>
+                  <option value="">None</option>
+                  <option value="custom">Custom URL</option>
+                </select>
+                {isCustomLogo && (
+                  <input
+                    type="url"
+                    value={invoiceData.companyLogoUrl}
+                    onChange={(e) => handleInputChange("companyLogoUrl", e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                    placeholder="Enter custom logo URL"
+                  />
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">Company Country</label>
+                <select
+                  value={invoiceData.companyCountry || ""}
+                  onChange={(e) => handleInputChange("companyCountry", e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                >
+                  <option value="">Select country</option>
+                  {countryList.map(country => (
+                    <option key={country.code} value={country.code}>{country.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">Customer Country</label>
+                <select
+                  value={invoiceData.customerCountry || ""}
+                  onChange={(e) => handleInputChange("customerCountry", e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                >
+                  <option value="">Select country</option>
+                  {countryList.map(country => (
+                    <option key={country.code} value={country.code}>{country.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-end">
+                <label className="flex items-center text-sm font-medium text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={invoiceData.isReverseCharge}
+                    onChange={(e) => handleInputChange("isReverseCharge", e.target.checked)}
+                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2"
+                    disabled={!isEUCompany || !isEUCustomer || !invoiceData.customerVat || invoiceData.companyCountry === invoiceData.customerCountry}
+                  />
+                  Reverse-Charge VAT
+                  {isEUCompany && isEUCustomer && invoiceData.customerVat && invoiceData.companyCountry !== invoiceData.customerCountry && (
+                    <span className="ml-1 text-xs text-gray-500">(Auto-applied for B2B cross-border EU)</span>
+                  )}
+                </label>
               </div>
             </div>
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                Print / Export as PDF
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Print Version */}
-      <div className="print-only">
-        <div className="invoice-content bg-white p-14">
-          <InvoicePreview data={invoiceData} />
-        </div>
-      </div>
-    </>
-  );
-}
+          {/* --- INVOICE --- */}
+          <div className="invoice-container bg-white p-12 shadow-lg rounded-lg border border-gray-200">
+            <header className="flex justify-between items-start mb-12">
+              <div className="w-1/2">
+                <h1 className="text-4xl font-bold text-gray-800 mb-6">Invoice</h1>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm max-w-xs">
+                  <strong className="text-gray-600">Invoice number</strong>
+                  <EditableField value={invoiceData.invoiceNumber} onChange={(v) => handleInputChange('invoiceNumber', v)} placeholder="INV-0001" />
 
-function InvoicePreview({ data }: { data: InvoiceData }) {
-  return (
-    <>
-      <div className="relative">
-        <div className="absolute right-0 top-0 text-right">
-          <h1 className="text-2xl font-semibold mb-4">Invoice</h1>
-          <p className="space-y-1 text-sm">
-            <span className="block">
-              <strong>Invoice number</strong>&nbsp;&nbsp;&nbsp;#{data.receiptNumber || "INV-001"}
-            </span>
-            <span className="block">
-              <strong>Date of issue</strong>&nbsp;&nbsp;&nbsp;&nbsp;{data.issueDate}
-            </span>
-            <span className="block">
-              <strong>Date paid</strong>&nbsp;&nbsp;&nbsp;&nbsp;{data.paidDate}
-            </span>
-            {data.customFieldName && (
-              <span className="block">
-                <strong>{data.customFieldName}</strong> {data.customFieldValue}
-              </span>
-            )}
-          </p>
-        </div>
+                  <strong className="text-gray-600">Date of issue</strong>
+                  <input type="date" value={invoiceData.issueDate} onChange={(e) => handleInputChange("issueDate", e.target.value)} className="bg-transparent text-gray-800 text-left focus:bg-gray-100 p-1 -m-1 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors" />
+                  
+                  <strong className="text-gray-600">Date due</strong>
+                  <input type="date" value={invoiceData.dueDate} onChange={(e) => handleInputChange("dueDate", e.target.value)} className="bg-transparent text-gray-800 text-left focus:bg-gray-100 p-1 -m-1 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors" />
+                </div>
+              </div>
+              <div className="w-1/2 flex justify-end">
+                {invoiceData.companyLogoUrl && isValidImageUrl(invoiceData.companyLogoUrl) && (
+                  <Image src={invoiceData.companyLogoUrl} alt="Company Logo" width={200} height={50} style={{ maxHeight: '50px', width: 'auto' }} />
+                )}
+              </div>
+            </header>
+            
+            <section className="flex justify-between mb-12">
+               <div className="w-1/2 pr-8">
+                 <EditableField value={invoiceData.companyName} onChange={(v) => handleInputChange('companyName', v)} placeholder="Your Company" className="font-bold" />
+                 <EditableField value={invoiceData.companyAddress} onChange={(v) => handleInputChange('companyAddress', v)} placeholder="Your company address" isTextarea className="text-sm mt-2 editable-textarea" />
+              </div>
+              <div className="w-1/2 pl-8">
+                <h2 className="text-sm font-semibold text-gray-500 mb-2">Bill to</h2>
+                <EditableField value={invoiceData.customerName} onChange={(v) => handleInputChange('customerName', v)} placeholder="Client's Name" className="font-bold" />
+                <EditableField value={invoiceData.customerAddress} onChange={(v) => handleInputChange('customerAddress', v)} placeholder="Client's address" isTextarea className="text-sm mt-2 editable-textarea" />
+                {isEUCustomer && (
+                  <EditableField value={invoiceData.customerVat} onChange={(v) => handleInputChange('customerVat', v)} placeholder="VAT Number (if applicable)" className="text-sm mt-2" />
+                )}
+              </div>
+            </section>
 
-        {data.companyLogoUrl && (
-          <div className="mb-8">
-            <Image
-              src={data.companyLogoUrl}
-              alt={data.companyName}
-              width={200}
-              height={50}
-              className="mb-4"
-              style={{ 
-                maxHeight: "50px",
-                width: "auto"
-              }}
-            />
+            <section className="mb-12">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">US${total.toFixed(2)} due {new Date(invoiceData.dueDate).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric"})}</h2>
+            </section>
+
+            {/* --- ITEMS TABLE --- */}
+            <section>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-gray-400 text-sm text-gray-600">
+                    <th className="p-2 pb-3 font-semibold w-1/2">Description</th>
+                    <th className="p-2 pb-3 font-semibold text-right">Qty</th>
+                    <th className="p-2 pb-3 font-semibold text-right">Unit price</th>
+                    <th className="p-2 pb-3 font-semibold text-right">Tax</th>
+                    <th className="p-2 pb-3 font-semibold text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoiceData.items.map((item, index) => {
+                    const itemTotal = item.quantity * item.unitPrice;
+                    return (
+                      <tr key={item.id} className="border-b border-gray-200">
+                        <td className="p-2 align-top">
+                          <EditableField value={item.description} onChange={(v) => handleItemChange(item.id, 'description', v)} placeholder="Item description" isTextarea className="text-sm editable-textarea" />
+                        </td>
+                        <td className="p-2 align-top text-right">
+                          <input type="number" value={item.quantity} onChange={(e) => handleItemChange(item.id, 'quantity', parseFloat(e.target.value) || 0)} className="w-16 text-right bg-transparent text-gray-800 focus:bg-gray-100 p-1 -m-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors" />
+                        </td>
+                        <td className="p-2 align-top text-right">
+                          <input type="number" value={item.unitPrice} onChange={(e) => handleItemChange(item.id, 'unitPrice', parseFloat(e.target.value) || 0)} className="w-24 text-right bg-transparent text-gray-800 focus:bg-gray-100 p-1 -m-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors" />
+                        </td>
+                        <td className="p-2 align-top text-right text-sm text-gray-600">
+                           {shouldApplyVAT ? (
+                             `${taxRate}%`
+                           ) : (
+                             isEUCustomer && invoiceData.isReverseCharge ? (
+                               <>0%<sup>[1]</sup></>
+                             ) : (
+                               '0%'
+                             )
+                           )}
+                        </td>
+                        <td className="p-2 align-top text-right text-sm text-gray-800">US${itemTotal.toFixed(2)}</td>
+                        <td className="p-2 align-top text-right no-print">
+                            {index > 0 && (
+                              <button onClick={() => removeItem(item.id)} className="text-red-500 hover:text-red-700">&times;</button>
+                            )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+              <div className="no-print mt-4">
+                  <button onClick={addItem} className="text-blue-600 hover:text-blue-800 font-semibold text-sm">+ Add item</button>
+              </div>
+            </section>
+
+            {/* --- TOTALS --- */}
+            <section className="flex justify-end mt-8">
+              <div className="w-1/2 max-w-xs text-sm">
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-gray-800">US${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-gray-600">Tax ({taxRate}%)</span>
+                  <span className="text-gray-800">US${taxAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-gray-600">Total</span>
+                   <span className="text-gray-800">US${total.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between py-3 font-bold text-base">
+                  <span className="text-gray-600">Amount due</span>
+                  <span className="text-gray-800">US${total.toFixed(2)}</span>
+                </div>
+              </div>
+            </section>
+
+            {/* --- NOTES --- */}
+            <section className="mt-12">
+                <EditableField value={invoiceData.notes} onChange={(v) => handleInputChange('notes', v)} isTextarea className="text-sm editable-textarea" />
+            </section>
+
           </div>
-        )}
-        <div className="mb-6">
-          <p className="whitespace-pre-line text-sm">
-            {data.companyName}
-            {"\n"}
-            VAT ID: {data.companyAddress.registrationNumber}
-            {"\n"}
-            {data.companyAddress.street}
-            {"\n"}
-            {data.companyAddress.postalCode} {data.companyAddress.city}
-            {"\n"}
-            {data.companyAddress.country}
-          </p>
-        </div>
-
-        <div className="mb-6">
-          <p className="text-sm">
-            <strong>Bill to</strong>
-            {data.customerName && (
-              <>
-                <br />
-                {data.customerName}
-              </>
-            )}
-            {data.customerEmail && (
-              <>
-                <br />
-                {data.customerEmail}
-              </>
-            )}
-            {data.customerAddress.line1 && (
-              <>
-                <br />
-                {data.customerAddress.line1}
-              </>
-            )}
-            {data.customerAddress.line2 && (
-              <>
-                <br />
-                {data.customerAddress.line2}
-              </>
-            )}
-            {data.customerAddress.postalCode && (
-              <>
-                <br />
-                {data.customerAddress.postalCode}
-              </>
-            )}
-            {data.customerAddress.state && (
-              <>
-                <br />
-                {data.customerAddress.state}
-              </>
-            )}
-            {data.customerAddress.city && (
-              <>
-                <br />
-                {data.customerAddress.city}
-              </>
-            )}
-            {data.customerAddress.country && (
-              <>
-                <br />
-                {data.customerAddress.country}
-              </>
-            )}
-          </p>
-        </div>
-
-        <h1 className="text-xl font-semibold mb-3">
-          US${data.amountPaid.toFixed(2)} paid {data.paidDate ? new Date(data.paidDate).toLocaleDateString("en-US", { 
-            year: "numeric", 
-            month: "long", 
-            day: "numeric" 
-          }) : ""}
-        </h1>
-
-        {data.paymentLast4 && (
-          <p className="mb-6 text-sm">
-            Paid with {data.paymentBrand} *{data.paymentLast4}
-          </p>
-        )}
-
-        <table className="w-full border-collapse mb-8 text-sm">
-          <thead>
-            <tr>
-              <th className="border-b border-black p-2 text-left">Description</th>
-              <th className="border-b border-black p-2 text-left">Qty</th>
-              <th className="border-b border-black p-2 text-left">Unit price</th>
-              <th className="border-b border-black p-2 text-left">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="bg-gray-100 border-b border-black">
-              <td className="p-2">{data.itemDescription}</td>
-              <td className="p-2">1</td>
-              <td className="p-2">${data.amountPaid.toFixed(2)}</td>
-              <td className="p-2">${data.amountPaid.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td className="p-2"></td>
-              <td className="p-2"></td>
-              <td className="p-2">Subtotal</td>
-              <td className="p-2">${data.amountPaid.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td className="p-2"></td>
-              <td className="p-2"></td>
-              <td className="p-2 bg-gray-100 border-t border-b border-black font-semibold">
-                Amount paid
-              </td>
-              <td className="p-2 bg-gray-100 border-t border-b border-black font-semibold">
-                ${data.amountPaid.toFixed(2)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div className="mt-12">
-          <p className="text-sm">Questions? Contact us at {data.contactEmail}</p>
         </div>
       </div>
     </>
