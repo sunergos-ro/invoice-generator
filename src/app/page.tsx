@@ -88,17 +88,18 @@ interface EditableFieldProps {
   placeholder?: string;
   className?: string;
   isTextarea?: boolean;
+  rows?: number;
 }
 
-const EditableField: FC<EditableFieldProps> = ({ value, onChange, placeholder, className, isTextarea = false }) => {
+const EditableField: FC<EditableFieldProps> = ({ value, onChange, placeholder, className, isTextarea = false, rows = 4 }) => {
   const commonProps = {
     value,
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(e.target.value),
     placeholder,
-    className: `text-gray-800 placeholder-gray-400 bg-transparent focus:bg-gray-100 p-1 -m-1 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors ${className}`
+    className: `text-gray-800 placeholder-gray-400 bg-transparent focus:bg-gray-100 p-1 -m-1 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors print-no-placeholder ${className}`
   };
 
-  return isTextarea ? <textarea {...commonProps} rows={4} /> : <input type="text" {...commonProps} />;
+  return isTextarea ? <textarea {...commonProps} rows={rows} /> : <input type="text" {...commonProps} />;
 };
 
 const defaultInvoiceData: InvoiceData = {
@@ -292,6 +293,19 @@ export default function Home() {
              max-width: 100% !important;
              border: none !important;
           }
+          .print-no-placeholder:placeholder-shown {
+            color: transparent !important;
+          }
+          .print-no-placeholder::placeholder {
+            color: transparent !important;
+          }
+          input, textarea {
+            border: none !important;
+            background: transparent !important;
+          }
+          input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {
+            color: transparent !important;
+          }
         }
         .editable-textarea {
           white-space: pre-wrap;
@@ -395,10 +409,10 @@ export default function Home() {
                   <EditableField value={invoiceData.invoiceNumber} onChange={(v) => handleInputChange('invoiceNumber', v)} placeholder="INV-0001" />
 
                   <strong className="text-gray-600">Date of issue</strong>
-                  <input type="date" value={invoiceData.issueDate} onChange={(e) => handleInputChange("issueDate", e.target.value)} className="bg-transparent text-gray-800 text-left focus:bg-gray-100 p-1 -m-1 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors" />
+                  <input type="date" value={invoiceData.issueDate} onChange={(e) => handleInputChange("issueDate", e.target.value)} className="bg-transparent text-gray-800 text-left focus:bg-gray-100 p-1 -m-1 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors print-no-placeholder" />
                   
                   <strong className="text-gray-600">Date due</strong>
-                  <input type="date" value={invoiceData.dueDate} onChange={(e) => handleInputChange("dueDate", e.target.value)} className="bg-transparent text-gray-800 text-left focus:bg-gray-100 p-1 -m-1 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors" />
+                  <input type="date" value={invoiceData.dueDate} onChange={(e) => handleInputChange("dueDate", e.target.value)} className="bg-transparent text-gray-800 text-left focus:bg-gray-100 p-1 -m-1 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors print-no-placeholder" />
                 </div>
               </div>
               <div className="w-1/2 flex justify-end">
@@ -410,15 +424,15 @@ export default function Home() {
             
             <section className="flex justify-between mb-12">
                <div className="w-1/2 pr-8">
-                 <EditableField value={invoiceData.companyName} onChange={(v) => handleInputChange('companyName', v)} placeholder="Your Company" className="font-bold" />
-                 <EditableField value={invoiceData.companyAddress} onChange={(v) => handleInputChange('companyAddress', v)} placeholder="Your company address" isTextarea className="text-sm mt-2 editable-textarea" />
+                 <EditableField value={invoiceData.companyName} onChange={(v) => handleInputChange('companyName', v)} placeholder="Your Company Name" className="font-bold" />
+                 <EditableField value={invoiceData.companyAddress} onChange={(v) => handleInputChange('companyAddress', v)} placeholder="123 Business St\nSuite 100\nCity, State 12345\nCountry\nemail@company.com" isTextarea rows={5} className="text-sm mt-2 editable-textarea" />
               </div>
               <div className="w-1/2 pl-8">
                 <h2 className="text-sm font-semibold text-gray-500 mb-2">Bill to</h2>
-                <EditableField value={invoiceData.customerName} onChange={(v) => handleInputChange('customerName', v)} placeholder="Client's Name" className="font-bold" />
-                <EditableField value={invoiceData.customerAddress} onChange={(v) => handleInputChange('customerAddress', v)} placeholder="Client's address" isTextarea className="text-sm mt-2 editable-textarea" />
+                <EditableField value={invoiceData.customerName} onChange={(v) => handleInputChange('customerName', v)} placeholder="Client Company Name" className="font-bold" />
+                <EditableField value={invoiceData.customerAddress} onChange={(v) => handleInputChange('customerAddress', v)} placeholder="456 Client Ave\nFloor 5\nCity, State 67890\nCountry\nclient@email.com" isTextarea rows={5} className="text-sm mt-2 editable-textarea" />
                 {isEUCustomer && (
-                  <EditableField value={invoiceData.customerVat} onChange={(v) => handleInputChange('customerVat', v)} placeholder="VAT Number (if applicable)" className="text-sm mt-2" />
+                  <EditableField value={invoiceData.customerVat} onChange={(v) => handleInputChange('customerVat', v)} placeholder="VAT Number (e.g., DE123456789)" className="text-sm mt-2" />
                 )}
               </div>
             </section>
@@ -445,13 +459,13 @@ export default function Home() {
                     return (
                       <tr key={item.id} className="border-b border-gray-200">
                         <td className="p-2 align-top">
-                          <EditableField value={item.description} onChange={(v) => handleItemChange(item.id, 'description', v)} placeholder="Item description" isTextarea className="text-sm editable-textarea" />
+                          <EditableField value={item.description} onChange={(v) => handleItemChange(item.id, 'description', v)} placeholder="Product or service description\nAdd details here..." isTextarea className="text-sm editable-textarea" />
                         </td>
                         <td className="p-2 align-top text-right">
-                          <input type="number" value={item.quantity} onChange={(e) => handleItemChange(item.id, 'quantity', parseFloat(e.target.value) || 0)} className="w-16 text-right bg-transparent text-gray-800 focus:bg-gray-100 p-1 -m-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors" />
+                          <input type="number" value={item.quantity} onChange={(e) => handleItemChange(item.id, 'quantity', parseFloat(e.target.value) || 0)} placeholder="1" className="w-16 text-right bg-transparent text-gray-800 focus:bg-gray-100 p-1 -m-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors print-no-placeholder" />
                         </td>
                         <td className="p-2 align-top text-right">
-                          <input type="number" value={item.unitPrice} onChange={(e) => handleItemChange(item.id, 'unitPrice', parseFloat(e.target.value) || 0)} className="w-24 text-right bg-transparent text-gray-800 focus:bg-gray-100 p-1 -m-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors" />
+                          <input type="number" value={item.unitPrice} onChange={(e) => handleItemChange(item.id, 'unitPrice', parseFloat(e.target.value) || 0)} placeholder="0.00" step="0.01" className="w-24 text-right bg-transparent text-gray-800 focus:bg-gray-100 p-1 -m-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors print-no-placeholder" />
                         </td>
                         <td className="p-2 align-top text-right text-sm text-gray-600">
                            {shouldApplyVAT ? (
@@ -504,7 +518,7 @@ export default function Home() {
 
             {/* --- NOTES --- */}
             <section className="mt-12">
-                <EditableField value={invoiceData.notes} onChange={(v) => handleInputChange('notes', v)} isTextarea className="text-sm editable-textarea" />
+                <EditableField value={invoiceData.notes} onChange={(v) => handleInputChange('notes', v)} placeholder="Additional notes, payment terms, or special instructions..." isTextarea className="text-sm editable-textarea" />
             </section>
 
           </div>
