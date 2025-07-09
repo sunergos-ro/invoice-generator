@@ -4,7 +4,7 @@ A simple, free invoice generator for Stripe one-time payments built with Next.js
 
 ## Demo
 
-[![Watch the video](https://img.youtube.com/vi/C_hKSgCNy-U/0.jpg)](https://youtu.be/C_hKSgCNy-U)
+[![Watch the video](https://img.youtube.com/vi/Hwarc6oYa-o/0.jpg)](https://youtu.be/Hwarc6oYa-o)
 
 ## Deploy to Vercel
 
