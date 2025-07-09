@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, FC } from "react";
 import Image from "next/image";
 import { countries } from "countries-list";
+import { useInvoiceStore, type BusinessEntity, type ClientEntity } from "@/stores/invoiceStore";
 
 const EU_VAT_RATES: Record<string, { standard: number; countryCode: string }> = {
   "AT": { standard: 20, countryCode: "AT" }, // Austria
@@ -123,6 +124,11 @@ const defaultInvoiceData: InvoiceData = {
 
 export default function Home() {
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const [selectedBusinessId, setSelectedBusinessId] = useState<string>("");
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [hasUnsavedBusinessChanges, setHasUnsavedBusinessChanges] = useState(false);
+  const [hasUnsavedClientChanges, setHasUnsavedClientChanges] = useState(false);
+  const { businesses, clients, addBusiness, updateBusiness, addClient, updateClient } = useInvoiceStore();
   const countryList = useMemo(() => getCountryList(), []);
 
   const isEUCustomer = useMemo(() => {
@@ -184,6 +190,36 @@ export default function Home() {
     }
     setInvoiceData(defaultInvoiceData);
   }, []);
+
+  // Track changes to business fields
+  useEffect(() => {
+    if (!invoiceData || !selectedBusinessId || selectedBusinessId === "new") return;
+    
+    const business = businesses.find(b => b.id === selectedBusinessId);
+    if (business) {
+      const hasChanges = 
+        business.name !== invoiceData.companyName ||
+        business.address !== invoiceData.companyAddress ||
+        business.country !== invoiceData.companyCountry ||
+        business.logoUrl !== invoiceData.companyLogoUrl;
+      setHasUnsavedBusinessChanges(hasChanges);
+    }
+  }, [invoiceData?.companyName, invoiceData?.companyAddress, invoiceData?.companyCountry, invoiceData?.companyLogoUrl, selectedBusinessId, businesses]);
+
+  // Track changes to client fields
+  useEffect(() => {
+    if (!invoiceData || !selectedClientId || selectedClientId === "new") return;
+    
+    const client = clients.find(c => c.id === selectedClientId);
+    if (client) {
+      const hasChanges = 
+        client.name !== invoiceData.customerName ||
+        client.address !== invoiceData.customerAddress ||
+        client.country !== invoiceData.customerCountry ||
+        client.vat !== invoiceData.customerVat;
+      setHasUnsavedClientChanges(hasChanges);
+    }
+  }, [invoiceData?.customerName, invoiceData?.customerAddress, invoiceData?.customerCountry, invoiceData?.customerVat, selectedClientId, clients]);
 
   const handleInputChange = (field: keyof InvoiceData, value: string | boolean) => {
     if (!invoiceData) return;
@@ -317,6 +353,152 @@ export default function Home() {
           {/* --- CONTROLS --- */}
           <div className="no-print mb-8 p-6 bg-white rounded-lg shadow-md border border-gray-200">
              <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Invoice Generator</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">Business</label>
+                <div className="flex gap-2">
+                  <select
+                    value={selectedBusinessId}
+                    onChange={(e) => {
+                      const businessId = e.target.value;
+                      setSelectedBusinessId(businessId);
+                      
+                      if (businessId === "new") {
+                        // Reset to default business data
+                        handleInputChange("companyName", defaultInvoiceData.companyName);
+                        handleInputChange("companyAddress", defaultInvoiceData.companyAddress);
+                        handleInputChange("companyCountry", defaultInvoiceData.companyCountry);
+                        handleInputChange("companyLogoUrl", defaultInvoiceData.companyLogoUrl);
+                        setHasUnsavedBusinessChanges(false);
+                      } else if (businessId) {
+                        const business = businesses.find(b => b.id === businessId);
+                        if (business) {
+                          handleInputChange("companyName", business.name);
+                          handleInputChange("companyAddress", business.address);
+                          handleInputChange("companyCountry", business.country);
+                          handleInputChange("companyLogoUrl", business.logoUrl);
+                          setHasUnsavedBusinessChanges(false);
+                        }
+                      }
+                    }}
+                    className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                  >
+                    <option value="">Select business...</option>
+                    <option value="new">+ New Business</option>
+                    {businesses.map(business => (
+                      <option key={business.id} value={business.id}>{business.name}</option>
+                    ))}
+                  </select>
+                  {(selectedBusinessId || hasUnsavedBusinessChanges) && (
+                    <button
+                      onClick={() => {
+                        if (!invoiceData) return;
+                        
+                        if (selectedBusinessId && selectedBusinessId !== "new") {
+                          // Update existing
+                          updateBusiness(selectedBusinessId, {
+                            name: invoiceData.companyName,
+                            address: invoiceData.companyAddress,
+                            country: invoiceData.companyCountry,
+                            logoUrl: invoiceData.companyLogoUrl
+                          });
+                        } else {
+                          // Add new
+                          const newBusiness: BusinessEntity = {
+                            id: Date.now().toString(),
+                            name: invoiceData.companyName,
+                            address: invoiceData.companyAddress,
+                            country: invoiceData.companyCountry,
+                            logoUrl: invoiceData.companyLogoUrl
+                          };
+                          addBusiness(newBusiness);
+                          setSelectedBusinessId(newBusiness.id);
+                        }
+                        setHasUnsavedBusinessChanges(false);
+                      }}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      Save
+                    </button>
+                  )}
+                </div>
+                {hasUnsavedBusinessChanges && (
+                  <p className="text-xs text-orange-600 mt-1">Unsaved changes</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">Client</label>
+                <div className="flex gap-2">
+                  <select
+                    value={selectedClientId}
+                    onChange={(e) => {
+                      const clientId = e.target.value;
+                      setSelectedClientId(clientId);
+                      
+                      if (clientId === "new") {
+                        // Reset to default client data
+                        handleInputChange("customerName", defaultInvoiceData.customerName);
+                        handleInputChange("customerAddress", defaultInvoiceData.customerAddress);
+                        handleInputChange("customerCountry", defaultInvoiceData.customerCountry);
+                        handleInputChange("customerVat", defaultInvoiceData.customerVat);
+                        setHasUnsavedClientChanges(false);
+                      } else if (clientId) {
+                        const client = clients.find(c => c.id === clientId);
+                        if (client) {
+                          handleInputChange("customerName", client.name);
+                          handleInputChange("customerAddress", client.address);
+                          handleInputChange("customerCountry", client.country);
+                          handleInputChange("customerVat", client.vat);
+                          setHasUnsavedClientChanges(false);
+                        }
+                      }
+                    }}
+                    className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                  >
+                    <option value="">Select client...</option>
+                    <option value="new">+ New Client</option>
+                    {clients.map(client => (
+                      <option key={client.id} value={client.id}>{client.name}</option>
+                    ))}
+                  </select>
+                  {(selectedClientId || hasUnsavedClientChanges) && (
+                    <button
+                      onClick={() => {
+                        if (!invoiceData) return;
+                        
+                        if (selectedClientId && selectedClientId !== "new") {
+                          // Update existing
+                          updateClient(selectedClientId, {
+                            name: invoiceData.customerName,
+                            address: invoiceData.customerAddress,
+                            country: invoiceData.customerCountry,
+                            vat: invoiceData.customerVat
+                          });
+                        } else {
+                          // Add new
+                          const newClient: ClientEntity = {
+                            id: Date.now().toString(),
+                            name: invoiceData.customerName,
+                            address: invoiceData.customerAddress,
+                            country: invoiceData.customerCountry,
+                            vat: invoiceData.customerVat
+                          };
+                          addClient(newClient);
+                          setSelectedClientId(newClient.id);
+                        }
+                        setHasUnsavedClientChanges(false);
+                      }}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      Save
+                    </button>
+                  )}
+                </div>
+                {hasUnsavedClientChanges && (
+                  <p className="text-xs text-orange-600 mt-1">Unsaved changes</p>
+                )}
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">Company Logo</label>

@@ -20,6 +20,7 @@ A simple, free invoice generator for Stripe one-time payments built with Next.js
 - **EU VAT Support**: Automatic VAT calculation and reverse-charge handling for EU businesses
 - **Multiple Line Items**: Add multiple products/services to your invoice
 - **Country Selection**: Built-in country dropdown with all global countries
+- **Business & Client Management**: Save and reuse frequently used business and client details
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Clean Print Layout**: Optimized print styles for professional PDF output
 
@@ -45,15 +46,19 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Usage
 
-1. **Company Setup**: Select your company's country and add your logo (or choose from presets)
-2. **Invoice Details**: Set invoice number, issue date, and due date
-3. **Customer Information**: Add customer details including country and VAT number (for EU businesses)
-4. **Add Line Items**: Add one or more products/services with quantities and prices
-5. **VAT Handling**: 
+1. **Business/Client Selection**: 
+   - Choose from saved businesses/clients or create new ones
+   - Save frequently used details for quick reuse
+   - See "Unsaved changes" indicator when details are modified
+2. **Company Setup**: Select your company's country and add your logo (or choose from presets)
+3. **Invoice Details**: Set invoice number, issue date, and due date
+4. **Customer Information**: Add customer details including country and VAT number (for EU businesses)
+5. **Add Line Items**: Add one or more products/services with quantities and prices
+6. **VAT Handling**: 
    - Automatic VAT calculation based on EU rules
    - B2B reverse-charge support for cross-border EU transactions
    - Smart detection of when VAT should apply
-6. **Print/Export**: Click "Print / Export as PDF" to generate your invoice
+7. **Print/Export**: Click "Print / Export as PDF" to generate your invoice
 
 The application automatically saves your inputs to localStorage, so your data persists between sessions.
 
@@ -74,6 +79,7 @@ This project uses:
 - **TypeScript 5** with strict mode
 - **Tailwind CSS v4**
 - **Turbopack** for fast development builds
+- **Zustand** for state management
 
 ### Commands
 
@@ -113,6 +119,13 @@ The invoice generator includes comprehensive EU VAT handling:
 - Each item can have its own description, quantity, and unit price
 - Real-time calculation of subtotals and totals
 - Easy-to-use interface for managing invoice items
+
+### Business & Client Management
+- Save frequently used business and client details
+- Quick selection from dropdown menus
+- Create new entities or update existing ones
+- Automatic unsaved changes detection
+- All data persisted to localStorage for future sessions
 
 ## Acknowledgments
 

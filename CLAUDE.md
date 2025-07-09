@@ -31,8 +31,11 @@ npm run lint
 ```
 src/app/              # Next.js App Router pages and layouts
 ├── layout.tsx        # Root layout with Geist fonts
-├── page.tsx          # Home page
+├── page.tsx          # Home page with invoice generator
 └── globals.css       # Global styles with Tailwind CSS
+
+src/stores/           # Zustand state management
+└── invoiceStore.ts   # Business and client entity management
 
 public/               # Static assets (SVG icons)
 ```
@@ -43,6 +46,7 @@ public/               # Static assets (SVG icons)
 - **TypeScript 5** with strict mode
 - **Tailwind CSS v4** (uses CSS-based configuration)
 - **Turbopack** for development builds
+- **Zustand** for state management with localStorage persistence
 
 ### TypeScript Configuration
 - Path alias: `@/*` maps to `./src/*`
@@ -51,12 +55,18 @@ public/               # Static assets (SVG icons)
 
 ## Important Notes
 
-1. **Fresh Project State**: This is a newly initialized Next.js project. The Stripe invoice generation functionality needs to be implemented.
+1. **Invoice Generator**: Fully functional invoice generator with EU VAT support, multiple line items, and print-to-PDF capabilities.
 
-2. **No Testing Framework**: Currently no testing setup. Consider adding Jest or Vitest when implementing features.
+2. **Business/Client Management**: Users can save and manage frequently used business and client details for quick reuse. The feature includes:
+   - Dropdown selectors for saved entities
+   - In-place editing with unsaved changes detection
+   - Persistent storage via Zustand and localStorage
+   - Support for multiple businesses and clients
 
-3. **Environment Variables**: No `.env` files exist yet. When adding Stripe integration, create `.env.local` for API keys.
+3. **No Testing Framework**: Currently no testing setup. Consider adding Jest or Vitest when implementing features.
 
-4. **Tailwind CSS v4**: This project uses the latest Tailwind version which uses CSS-based configuration instead of a JavaScript config file.
+4. **Environment Variables**: No `.env` files exist yet. When adding Stripe integration, create `.env.local` for API keys.
 
-5. **Type Safety**: Always maintain TypeScript strict mode compliance when adding new code.
+5. **Tailwind CSS v4**: This project uses the latest Tailwind version which uses CSS-based configuration instead of a JavaScript config file.
+
+6. **Type Safety**: Always maintain TypeScript strict mode compliance when adding new code.
