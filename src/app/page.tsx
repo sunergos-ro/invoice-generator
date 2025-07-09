@@ -400,11 +400,11 @@ export default function Home() {
           </div>
 
           {/* --- INVOICE --- */}
-          <div className="invoice-container bg-white p-12 shadow-lg rounded-lg border border-gray-200">
-            <header className="flex justify-between items-start mb-12">
-              <div className="w-1/2">
-                <h1 className="text-4xl font-bold text-gray-800 mb-6">Invoice</h1>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm max-w-xs">
+          <div className="invoice-container bg-white p-6 sm:p-8 md:p-12 shadow-lg rounded-lg border border-gray-200">
+            <header className="flex flex-col sm:flex-row justify-between items-start mb-8 sm:mb-12 space-y-6 sm:space-y-0">
+              <div className="w-full sm:w-1/2">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">Invoice</h1>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm max-w-xs">
                   <strong className="text-gray-600">Invoice number</strong>
                   <EditableField value={invoiceData.invoiceNumber} onChange={(v) => handleInputChange('invoiceNumber', v)} placeholder="INV-0001" />
 
@@ -415,19 +415,19 @@ export default function Home() {
                   <input type="date" value={invoiceData.dueDate} onChange={(e) => handleInputChange("dueDate", e.target.value)} className="bg-transparent text-gray-800 text-left focus:bg-gray-100 p-1 -m-1 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors print-no-placeholder" />
                 </div>
               </div>
-              <div className="w-1/2 flex justify-end">
+              <div className="w-full sm:w-1/2 flex justify-start sm:justify-end">
                 {invoiceData.companyLogoUrl && isValidImageUrl(invoiceData.companyLogoUrl) && (
-                  <Image src={invoiceData.companyLogoUrl} alt="Company Logo" width={200} height={50} style={{ maxHeight: '50px', width: 'auto' }} />
+                  <Image src={invoiceData.companyLogoUrl} alt="Company Logo" width={200} height={50} style={{ maxHeight: '50px', width: 'auto' }} className="max-w-[150px] sm:max-w-[200px]" />
                 )}
               </div>
             </header>
             
-            <section className="flex justify-between mb-12">
-               <div className="w-1/2 pr-8">
+            <section className="flex flex-col sm:flex-row justify-between mb-8 sm:mb-12 space-y-6 sm:space-y-0">
+               <div className="w-full sm:w-1/2 sm:pr-8">
                  <EditableField value={invoiceData.companyName} onChange={(v) => handleInputChange('companyName', v)} placeholder="Your Company Name" className="font-bold" />
                  <EditableField value={invoiceData.companyAddress} onChange={(v) => handleInputChange('companyAddress', v)} placeholder="123 Business St\nSuite 100\nCity, State 12345\nCountry\nemail@company.com" isTextarea rows={5} className="text-sm mt-2 editable-textarea" />
               </div>
-              <div className="w-1/2 pl-8">
+              <div className="w-full sm:w-1/2 sm:pl-8">
                 <h2 className="text-sm font-semibold text-gray-500 mb-2">Bill to</h2>
                 <EditableField value={invoiceData.customerName} onChange={(v) => handleInputChange('customerName', v)} placeholder="Client Company Name" className="font-bold" />
                 <EditableField value={invoiceData.customerAddress} onChange={(v) => handleInputChange('customerAddress', v)} placeholder="456 Client Ave\nFloor 5\nCity, State 67890\nCountry\nclient@email.com" isTextarea rows={5} className="text-sm mt-2 editable-textarea" />
@@ -437,20 +437,20 @@ export default function Home() {
               </div>
             </section>
 
-            <section className="mb-12">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">US${total.toFixed(2)} due {new Date(invoiceData.dueDate).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric"})}</h2>
+            <section className="mb-8 sm:mb-12">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 break-words">US${total.toFixed(2)} due {new Date(invoiceData.dueDate).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric"})}</h2>
             </section>
 
             {/* --- ITEMS TABLE --- */}
-            <section>
-              <table className="w-full text-left">
+            <section className="overflow-x-auto -mx-6 sm:-mx-8 md:-mx-12 px-6 sm:px-8 md:px-12">
+              <table className="w-full text-left min-w-[600px]">
                 <thead>
-                  <tr className="border-b border-gray-400 text-sm text-gray-600">
-                    <th className="p-2 pb-3 font-semibold w-1/2">Description</th>
-                    <th className="p-2 pb-3 font-semibold text-right">Qty</th>
-                    <th className="p-2 pb-3 font-semibold text-right">Unit price</th>
-                    <th className="p-2 pb-3 font-semibold text-right">Tax</th>
-                    <th className="p-2 pb-3 font-semibold text-right">Amount</th>
+                  <tr className="border-b border-gray-400 text-xs sm:text-sm text-gray-600">
+                    <th className="p-1 sm:p-2 pb-2 sm:pb-3 font-semibold w-2/5 sm:w-1/2">Description</th>
+                    <th className="p-1 sm:p-2 pb-2 sm:pb-3 font-semibold text-right">Qty</th>
+                    <th className="p-1 sm:p-2 pb-2 sm:pb-3 font-semibold text-right">Unit price</th>
+                    <th className="p-1 sm:p-2 pb-2 sm:pb-3 font-semibold text-right">Tax</th>
+                    <th className="p-1 sm:p-2 pb-2 sm:pb-3 font-semibold text-right">Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -458,16 +458,16 @@ export default function Home() {
                     const itemTotal = item.quantity * item.unitPrice;
                     return (
                       <tr key={item.id} className="border-b border-gray-200">
-                        <td className="p-2 align-top">
+                        <td className="p-1 sm:p-2 align-top">
                           <EditableField value={item.description} onChange={(v) => handleItemChange(item.id, 'description', v)} placeholder="Product or service description\nAdd details here..." isTextarea className="text-sm editable-textarea" />
                         </td>
-                        <td className="p-2 align-top text-right">
-                          <input type="number" value={item.quantity} onChange={(e) => handleItemChange(item.id, 'quantity', parseFloat(e.target.value) || 0)} placeholder="1" className="w-16 text-right bg-transparent text-gray-800 focus:bg-gray-100 p-1 -m-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors print-no-placeholder" />
+                        <td className="p-1 sm:p-2 align-top text-right">
+                          <input type="number" value={item.quantity} onChange={(e) => handleItemChange(item.id, 'quantity', parseFloat(e.target.value) || 0)} placeholder="1" className="w-12 sm:w-16 text-right bg-transparent text-gray-800 focus:bg-gray-100 p-1 -m-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors print-no-placeholder text-xs sm:text-base" />
                         </td>
-                        <td className="p-2 align-top text-right">
-                          <input type="number" value={item.unitPrice} onChange={(e) => handleItemChange(item.id, 'unitPrice', parseFloat(e.target.value) || 0)} placeholder="0.00" step="0.01" className="w-24 text-right bg-transparent text-gray-800 focus:bg-gray-100 p-1 -m-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors print-no-placeholder" />
+                        <td className="p-1 sm:p-2 align-top text-right">
+                          <input type="number" value={item.unitPrice} onChange={(e) => handleItemChange(item.id, 'unitPrice', parseFloat(e.target.value) || 0)} placeholder="0.00" step="0.01" className="w-16 sm:w-24 text-right bg-transparent text-gray-800 focus:bg-gray-100 p-1 -m-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 hover:bg-gray-50 transition-colors print-no-placeholder text-xs sm:text-base" />
                         </td>
-                        <td className="p-2 align-top text-right text-sm text-gray-600">
+                        <td className="p-1 sm:p-2 align-top text-right text-xs sm:text-sm text-gray-600">
                            {shouldApplyVAT ? (
                              `${taxRate}%`
                            ) : (
@@ -478,8 +478,8 @@ export default function Home() {
                              )
                            )}
                         </td>
-                        <td className="p-2 align-top text-right text-sm text-gray-800">US${itemTotal.toFixed(2)}</td>
-                        <td className="p-2 align-top text-right no-print">
+                        <td className="p-1 sm:p-2 align-top text-right text-xs sm:text-sm text-gray-800">US${itemTotal.toFixed(2)}</td>
+                        <td className="p-1 sm:p-2 align-top text-right no-print">
                             {index > 0 && (
                               <button onClick={() => removeItem(item.id)} className="text-red-500 hover:text-red-700">&times;</button>
                             )}
@@ -495,8 +495,8 @@ export default function Home() {
             </section>
 
             {/* --- TOTALS --- */}
-            <section className="flex justify-end mt-8">
-              <div className="w-1/2 max-w-xs text-sm">
+            <section className="flex justify-end mt-6 sm:mt-8">
+              <div className="w-full sm:w-1/2 max-w-xs text-xs sm:text-sm">
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="text-gray-800">US${subtotal.toFixed(2)}</span>
@@ -509,7 +509,7 @@ export default function Home() {
                   <span className="text-gray-600">Total</span>
                    <span className="text-gray-800">US${total.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between py-3 font-bold text-base">
+                <div className="flex justify-between py-2 sm:py-3 font-bold text-sm sm:text-base">
                   <span className="text-gray-600">Amount due</span>
                   <span className="text-gray-800">US${total.toFixed(2)}</span>
                 </div>
@@ -517,7 +517,7 @@ export default function Home() {
             </section>
 
             {/* --- NOTES --- */}
-            <section className="mt-12">
+            <section className="mt-8 sm:mt-12">
                 <EditableField value={invoiceData.notes} onChange={(v) => handleInputChange('notes', v)} placeholder="Additional notes, payment terms, or special instructions..." isTextarea className="text-sm editable-textarea" />
             </section>
 
