@@ -13,26 +13,40 @@ This is a static HTML application that requires no build process:
 - **Local Development**: Simply open `form.html` in a web browser or use a local web server
 - **Deployment**: Upload all files to any static hosting service (Cloudflare Pages, GitHub Pages, Netlify, or any VPS)
 - **Files Required**:
-  - `form.html` - Main HTML file
-  - `form.css` - Stylesheet
-  - `form.js` - JavaScript functionality
-  - `/images/git-digest-logo.png` - Logo asset (if using Git Digest logo)
+  - `form.html` - Main invoice generator HTML
+  - `index.html` - Landing/home page
+  - `stylesheets/form.css` - Form-specific styles
+  - `stylesheets/common.css` - Common styles shared between pages
+  - `stylesheets/index.css` - Landing page styles
+  - `javascript/form.js` - JavaScript functionality
+  - `images/git-digest-logo.png` - Logo asset (if using Git Digest logo)
+  - `images/og-image.png` - Open Graph image for social sharing
+  - `favicon/` - Favicon assets
 
 ## Architecture and Structure
 
 ### File Structure
 ```
 /
-├── form.html         # Main invoice generator HTML
-├── form.css          # Tailwind-inspired CSS styles
-├── form.js           # JavaScript for invoice functionality
+├── form.html              # Main invoice generator HTML
+├── index.html             # Landing/home page
 ├── images/
 │   ├── git-digest-logo.png  # Git Digest logo
+│   └── og-image.png         # Open Graph image for social sharing
 ├── stylesheets/
 │   ├── common.css         # Common styles shared between pages
-│   └── form.css           # Form-specific styles
-└── javascript/
-    └── form.js            # JavaScript functionality
+│   ├── form.css           # Form-specific styles
+│   └── index.css          # Landing page styles
+├── javascript/
+│   └── form.js            # JavaScript functionality
+└── favicon/               # Favicon assets for various platforms
+    ├── favicon.ico
+    ├── favicon-16x16.png
+    ├── favicon-32x32.png
+    ├── apple-touch-icon.png
+    ├── android-chrome-192x192.png
+    ├── android-chrome-512x512.png
+    └── site.webmanifest
 ```
 
 ### Key Technologies
@@ -49,7 +63,7 @@ This is a static HTML application that requires no build process:
 2. **Business/Client Management**: Users can save and manage frequently used business and client details for quick reuse. The feature includes:
    - Dropdown selectors for saved entities
    - In-place editing with unsaved changes detection
-   - Persistent storage via Zustand and localStorage
+   - Persistent storage via localStorage
    - Support for multiple businesses and clients
 
 3. **Security**: The application includes security headers and avoids inline JavaScript for better CSP compliance.

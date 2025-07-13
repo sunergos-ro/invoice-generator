@@ -24,7 +24,7 @@ A simple, free invoice generator for Stripe one-time payments built with plain H
 4. Access your invoice generator at `https://[username].github.io/invoice-generator/form.html`
 
 ### Any Static Host or VPS
-Simply upload all files (`index.html`, `form.html`, `form.css`, `form.js`, and any logo files) to your web server.
+Simply upload all files and directories (`index.html`, `form.html`, `stylesheets/`, `javascript/`, `images/`, `favicon/`) to your web server.
 
 ## Features
 
@@ -85,11 +85,11 @@ The application automatically saves your inputs to localStorage, so your data pe
 
 You can customize the invoice by:
 - Selecting different company logos from the dropdown or providing a custom URL
-- Modifying the default company details in `form.js`
-- Adding new logo options by placing them in the root directory
+- Modifying the default company details in `javascript/form.js`
+- Adding new logo options by placing them in the `images/` directory
 - Adjusting the invoice layout in `form.html`
-- Customizing styles in `form.css`
-- Modifying print styles for PDF generation in the `@media print` section of `form.css`
+- Customizing styles in `stylesheets/form.css`
+- Modifying print styles for PDF generation in the `@media print` section of `stylesheets/form.css`
 
 ## Development
 
@@ -106,8 +106,8 @@ This project uses:
 - All data is stored in localStorage
 - No server or backend required
 - Works offline once loaded
-- Modify `form.js` to change default values and behavior
-- Edit `form.css` to customize styling
+- Modify `javascript/form.js` to change default values and behavior
+- Edit `stylesheets/form.css` to customize styling
 - Add security headers via your hosting provider (e.g., Cloudflare)
 
 ## Contributing
