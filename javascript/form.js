@@ -538,14 +538,27 @@ function renderItems() {
           const field = e.target.dataset.field;
           const value = field === 'description' ? e.target.value : parseFloat(e.target.value) || 0;
           
+          // Update the item in state
           state.invoiceData.items = state.invoiceData.items.map(item =>
               item.id === itemId ? { ...item, [field]: value } : item
           );
           
+          // If quantity or unit price changed, update the amount display
+          if (field === 'quantity' || field === 'unitPrice') {
+              const item = state.invoiceData.items.find(item => item.id === itemId);
+              if (item) {
+                  const itemTotal = item.quantity * item.unitPrice;
+                  // Find the amount cell for this item and update it
+                  const row = e.target.closest('tr');
+                  const amountCell = row.querySelector('td:nth-last-child(2)');
+                  if (amountCell) {
+                      amountCell.textContent = `US$${itemTotal.toFixed(2)}`;
+                  }
+              }
+          }
+          
           saveToStorage();
           updateTotals();
-          // Re-render items to update the amount column
-          renderItems();
       });
   });
 }
