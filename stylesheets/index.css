@@ -53,12 +53,14 @@
   position: fixed;
   bottom: 0;
   right: 0;
-  background-color: white;
+  background-color: #fff;
+  color: #000;
   padding: 10px;
   border-top-left-radius: 5px;
   border: 1px solid #e0e0e0;
   font-size: 12px;
   font-weight: 700;
+  text-align: center;
 }
 
 .author-credit a {
@@ -73,5 +75,10 @@
   
   .features-section {
       background-color: #111827;
+  }
+
+  .author-credit {
+    background-color: #111827;
+    color: #fff;
   }
 }
