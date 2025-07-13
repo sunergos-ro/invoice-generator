@@ -416,6 +416,11 @@ button {
   color: #1e40af;
 }
 
+/* Hidden state utility */
+.hidden {
+  display: none;
+}
+
 .btn-remove {
   background: none;
   border: none;
@@ -518,6 +523,12 @@ th {
   .sm\:max-w-\[200px\] {
       max-width: 200px;
   }
+}
+
+/* Company logo styles */
+#companyLogoImg {
+  max-height: 50px;
+  width: auto;
 }
 
 /* Spacing utilities */

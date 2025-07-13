@@ -45,9 +45,9 @@
                                 <option value="">Select business...</option>
                                 <option value="new">+ New Business</option>
                             </select>
-                            <button id="businessSaveBtn" class="btn-primary" style="display: none;">Save</button>
+                            <button id="businessSaveBtn" class="btn-primary hidden">Save</button>
                         </div>
-                        <p id="businessUnsaved" class="text-xs text-orange-600 mt-1" style="display: none;">Unsaved changes</p>
+                        <p id="businessUnsaved" class="text-xs text-orange-600 mt-1 hidden">Unsaved changes</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1 text-gray-700">Client</label>
@@ -56,9 +56,9 @@
                                 <option value="">Select client...</option>
                                 <option value="new">+ New Client</option>
                             </select>
-                            <button id="clientSaveBtn" class="btn-primary" style="display: none;">Save</button>
+                            <button id="clientSaveBtn" class="btn-primary hidden">Save</button>
                         </div>
-                        <p id="clientUnsaved" class="text-xs text-orange-600 mt-1" style="display: none;">Unsaved changes</p>
+                        <p id="clientUnsaved" class="text-xs text-orange-600 mt-1 hidden">Unsaved changes</p>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -70,7 +70,7 @@
                             <option value="">None</option>
                             <option value="custom">Custom URL</option>
                         </select>
-                        <input type="url" id="customLogoUrl" placeholder="Enter custom logo URL" class="w-full mt-2" style="display: none;">
+                        <input type="url" id="customLogoUrl" placeholder="Enter custom logo URL" class="w-full mt-2 hidden">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1 text-gray-700">Company Country</label>
@@ -88,7 +88,7 @@
                         <label class="flex items-center text-sm font-medium text-gray-700">
                             <input type="checkbox" id="reverseCharge">
                             Reverse-Charge VAT
-                            <span id="reverseChargeNote" class="ml-1 text-xs text-gray-500" style="display: none;">(Auto-applied for B2B cross-border EU)</span>
+                            <span id="reverseChargeNote" class="ml-1 text-xs text-gray-500 hidden">(Auto-applied for B2B cross-border EU)</span>
                         </label>
                     </div>
                 </div>
@@ -116,7 +116,7 @@
                         </div>
                     </div>
                     <div class="w-full sm:w-1/2 flex justify-start sm:justify-end">
-                        <img id="companyLogoImg" src="/images/git-digest-logo.png" alt="Company Logo" style="max-height: 50px; width: auto;" class="max-w-[150px] sm:max-w-[200px]">
+                        <img id="companyLogoImg" src="/images/git-digest-logo.png" alt="Company Logo" class="max-w-[150px] sm:max-w-[200px]">
                     </div>
                 </header>
                 
@@ -135,7 +135,7 @@ support@gitdigest.ai</textarea>
 Manhattan, NY 10001
 United States
 jdoe@acme.com</textarea>
-                        <input type="text" id="customerVat" placeholder="VAT Number (e.g., DE123456789)" class="text-sm mt-2" style="display: none;">
+                        <input type="text" id="customerVat" placeholder="VAT Number (e.g., DE123456789)" class="text-sm mt-2 hidden">
                     </div>
                 </section>
 
