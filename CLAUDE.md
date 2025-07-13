@@ -11,6 +11,7 @@ This is a plain HTML, CSS, and JavaScript application designed for generating St
 This is a static HTML application that requires no build process:
 
 - **Local Development**: Simply open `form.html` in a web browser or use a local web server
+- **Offline Usage**: Clone the repository locally and the application works completely offline - no internet connection required after initial download
 - **Deployment**: Upload all files to any static hosting service (Cloudflare Pages, GitHub Pages, Netlify, or any VPS)
 - **Files Required**:
   - `form.html` - Main invoice generator HTML
@@ -19,7 +20,6 @@ This is a static HTML application that requires no build process:
   - `stylesheets/common.css` - Common styles shared between pages
   - `stylesheets/index.css` - Landing page styles
   - `javascript/form.js` - JavaScript functionality
-  - `images/git-digest-logo.png` - Logo asset (if using Git Digest logo)
   - `images/og-image.png` - Open Graph image for social sharing
   - `favicon/` - Favicon assets
 
@@ -31,7 +31,6 @@ This is a static HTML application that requires no build process:
 ├── form.html              # Main invoice generator HTML
 ├── index.html             # Landing/home page
 ├── images/
-│   ├── git-digest-logo.png  # Git Digest logo
 │   └── og-image.png         # Open Graph image for social sharing
 ├── stylesheets/
 │   ├── common.css         # Common styles shared between pages
@@ -77,3 +76,5 @@ This is a static HTML application that requires no build process:
 5. **Browser Compatibility**: Works on all modern browsers that support ES6+ JavaScript.
 
 6. **No Backend Required**: Runs entirely in the browser with localStorage for persistence.
+
+7. **Offline Functionality**: Once cloned/downloaded, the application works completely offline. All assets and functionality are self-contained with no external dependencies or API calls.

@@ -29,6 +29,7 @@ Simply upload all files and directories (`index.html`, `form.html`, `stylesheets
 ## Features
 
 - **No Backend Required**: Runs entirely in your browser
+- **Works Offline**: Clone the repository and run completely offline - no internet connection needed after initial download
 - **localStorage Persistence**: Your invoice details are automatically saved
 - **Print to PDF**: Generate professional PDFs using your browser's print function
 - **Customizable**: Add your company logo and details
@@ -51,7 +52,7 @@ git clone https://github.com/sunergos-ro/invoice-generator.git
 # Navigate to the project directory
 cd invoice-generator
 
-# Option 1: Open directly in browser
+# Option 1: Open directly in browser (works offline!)
 # Simply open form.html in your web browser
 
 # Option 2: Use a local web server (Python)
@@ -61,6 +62,9 @@ python -m http.server 8000
 # Option 3: Use a local web server (Node.js)
 npx http-server
 # Open http://localhost:8080/form.html
+
+# Note: Once downloaded, the application works completely offline
+# No internet connection required!
 ```
 
 ### Usage
@@ -105,7 +109,8 @@ This project uses:
 - The application works entirely in the browser
 - All data is stored in localStorage
 - No server or backend required
-- Works offline once loaded
+- Works completely offline once downloaded/cloned
+- No external dependencies or API calls
 - Modify `javascript/form.js` to change default values and behavior
 - Edit `stylesheets/form.css` to customize styling
 - Add security headers via your hosting provider (e.g., Cloudflare)
