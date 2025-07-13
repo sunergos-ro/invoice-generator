@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>New Invoice - One-off Invoice Generator</title>
+    <meta name="description" content="Create professional invoices instantly with our free, open-source invoice generator. No signup required. EU VAT support, multiple line items, and instant PDF export.">
+    <meta name="keywords" content="invoice generator, free invoice, online invoice, invoice creator, EU VAT, invoice template, open source">
+    <meta property="og:title" content="New Invoice - One-off Invoice Generator">
+    <meta property="og:description" content="Create professional invoices instantly with our free, open-source invoice generator. No signup required.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://oneoffinvoice.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="New Invoice - One-off Invoice Generator">
+    <meta name="twitter:description" content="Create professional invoices instantly with our free, open-source invoice generator. No signup required.">
+    <meta name="twitter:image" content="https://oneoffinvoice.com/images/og-image.png">
+    <meta name="twitter:image:alt" content="One-off Invoice Generator - Create Professional Invoices in Seconds">
+    <meta name="twitter:creator" content="@RaulOnRails">
+    <meta name="twitter:domain" content="oneoffinvoice.com">
+    <meta name="twitter:url" content="https://oneoffinvoice.com">
+    <link rel="icon" type="image/x-icon" href="favicon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+    <link rel="manifest" href="favicon/site.webmanifest">
+    <link rel="stylesheet" href="stylesheets/common.css">
+    <link rel="stylesheet" href="stylesheets/form.css">
+</head>
+<body>
+    <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Controls -->
+            <div class="no-print mb-8 p-6 bg-white rounded-lg shadow-md border border-gray-200">
+                <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">One-off Invoice Generator</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-700">Business</label>
+                        <div class="flex gap-2">
+                            <select id="businessSelect" class="flex-1">
+                                <option value="">Select business...</option>
+                                <option value="new">+ New Business</option>
+                            </select>
+                            <button id="businessSaveBtn" class="btn-primary" style="display: none;">Save</button>
+                        </div>
+                        <p id="businessUnsaved" class="text-xs text-orange-600 mt-1" style="display: none;">Unsaved changes</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-700">Client</label>
+                        <div class="flex gap-2">
+                            <select id="clientSelect" class="flex-1">
+                                <option value="">Select client...</option>
+                                <option value="new">+ New Client</option>
+                            </select>
+                            <button id="clientSaveBtn" class="btn-primary" style="display: none;">Save</button>
+                        </div>
+                        <p id="clientUnsaved" class="text-xs text-orange-600 mt-1" style="display: none;">Unsaved changes</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-700">Company Logo</label>
+                        <select id="logoSelect" class="w-full">
+                            <option value="/assets/git-digest-logo.png">Git Digest</option>
+                            <option value="data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22utf-8%22%3F%3E%3Csvg%20version%3D%221.1%22%20id%3D%22Layer_1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20x%3D%220px%22%20y%3D%220px%22%20viewBox%3D%220%200%20557.3%20179.1%22%20style%3D%22enable-background%3Anew%200%200%20557.3%20179.1%3B%22%20xml%3Aspace%3D%22preserve%22%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E.st0%7Bfill%3A%2329A9E1%3B%7D.st1%7Bfill%3A%23FFFFFF%3B%7D%3C%2Fstyle%3E%3Cg%3E%3Cpath%20d%3D%22M176.6%2C112.3c-5.6%2C0-11.7-1.8-18.3-5.2l4.2-8.7c3.6%2C2.2%2C9.9%2C5.1%2C15%2C5.1c3.4%2C0%2C6-2.2%2C6-5.1c0-3.1-2.2-4.7-7-5.6l-5.3-1c-3-0.5-6.7-2.7-8.3-4.6c-1.6-1.9-2.6-5.2-2.6-8.1c0-8.9%2C7-14.8%2C17.5-14.8c7.3%2C0%2C12%2C2.2%2C16.2%2C4.2l-3.9%2C8c-4.5-2.3-7.8-3.3-11.2-3.3c-3.5%2C0-5.8%2C1.8-5.8%2C4.4c0%2C2.3%2C1.5%2C3.5%2C5.7%2C4.6l5.5%2C1.4c5.6%2C1.4%2C7.4%2C3.1%2C9%2C5.1c1.7%2C2.1%2C2.5%2C4.7%2C2.5%2C7.7C196%2C105.9%2C188.2%2C112.3%2C176.6%2C112.3z%22%2F%3E%3Cpath%20d%3D%22M234.6%2C112.1c-1.5-1.1-2.7-2.6-3.5-4.4c-2.9%2C2.8-7.2%2C4.3-11.9%2C4.3c-6.4%2C0-11.9-3-13.4-7.3c-0.7-2-1-4.4-1-9v-29l11.7-2.2v29.1c0%2C4.1%2C0.4%2C6.2%2C1%2C7.4c0.6%2C1.2%2C2.4%2C2.1%2C4.2%2C2.1c2.9%2C0%2C6.5-2.1%2C7.3-4.3V66.9l11.3-2.4v34.6c0%2C3%2C1%2C6.1%2C2.7%2C8.2L234.6%2C112.1z%22%2F%3E%3Cpath%20d%3D%22M276.8%2C110.9V81.4c0-5.1-0.9-6.6-4-6.6c-2.4%2C0-5.5%2C1.6-8.2%2C4.1v32h-11.9V78c0-3.9-0.5-7.6-1.6-10.6l10.5-3c1.1%2C1.9%2C1.7%2C3.8%2C1.7%2C5.7c1.8-1.2%2C3.3-2.3%2C5.2-3.4c2.4-1.2%2C5.5-1.9%2C8.1-1.9c5%2C0%2C9.5%2C2.7%2C10.9%2C6.6c0.6%2C1.7%2C0.9%2C3.6%2C0.9%2C6.5v33.1H276.8z%22%2F%3E%3Cpath%20d%3D%22M311.9%2C91.9v0.4c0%2C7%2C3.5%2C11%2C9.6%2C11c4.1%2C0%2C7.9-1.5%2C11.5-4.5l4.6%2C7.1c-5.2%2C4.2-10.7%2C6.3-17.1%2C6.3c-13%2C0-21.4-9.2-21.4-23.5c0-8.1%2C1.7-13.5%2C5.7-18c3.7-4.2%2C8.2-6.1%2C14.3-6.1c5.2%2C0%2C10.2%2C1.8%2C13.1%2C4.8c4.2%2C4.2%2C6%2C10.4%2C6%2C19.8v2.7H311.9z%20M325.8%2C82.7c0-3.4-0.4-5.1-1.4-6.8c-1.2-1.8-2.8-2.7-5.2-2.7c-4.5%2C0-7.1%2C3.5-7.1%2C9.8v0.2h13.7V82.7z%22%2F%3E%3Cpath%20d%3D%22M370%2C75.9c-1.2-0.6-2.1-0.9-3.5-0.9c-2.7%2C0-5%2C1.2-7.3%2C3.8v32h-11.9V80.6c0-6.1-0.7-10.7-1.7-13.3l10.6-2.8c1.1%2C1.9%2C1.7%2C3.9%2C1.9%2C6.5c2.6-3.5%2C6.2-6.5%2C10.6-6.5c1.8%2C0%2C2.6%2C0.2%2C4.4%2C1L370%2C75.9z%22%2F%3E%3Cpath%20d%3D%22M414.1%2C73.9c-1.2%2C0-2.4-0.2-3.1-0.3c1.8%2C2.1%2C2.7%2C4.4%2C2.7%2C7.4c0%2C7.8-7.1%2C13.5-16.7%2C13.5c-0.5%2C0-0.9%2C0-1.8-0.1c-3%2C1.4-4.7%2C2.5-4.7%2C3.7c0%2C0.6%2C0.7%2C1.1%2C1.9%2C1.1l6.4%2C0.1c6.9%2C0.1%2C10.5%2C1.2%2C13.7%2C4.1c2.7%2C2.5%2C3.9%2C5.6%2C3.9%2C9.6c0%2C3.8-1.2%2C6.7-3.6%2C9.4c-4%2C4.2-10.8%2C5.8-17.9%2C5.8c-6.5%2C0-13.1-1.1-17.2-4.9c-2.5-2.3-3.7-5-3.7-8.1c0-2.5%2C0.6-3.7%2C1.1-4.6h11c-0.4%2C1.1-0.5%2C1.7-0.5%2C2.9c0%2C3.6%2C3%2C5.6%2C8.5%2C5.6c3%2C0%2C5.6-0.4%2C7.4-1.5c1.8-1.1%2C2.9-2.7%2C2.9-4.6c0-4.1-3.6-5.3-8.3-5.4l-5-0.1c-5.3-0.1-8.8-0.5-10.9-1.4c-2.1-0.8-3.5-2.8-3.5-5.9c0-2.9%2C0.9-5.7%2C8.3-7.6c-6.6-1.7-9.7-5.8-9.7-12.6c0-9.3%2C7.5-15.3%2C19.1-15.3c2.6%2C0%2C4.9%2C0.4%2C8.1%2C1.2c2.5%2C0.6%2C4.1%2C1%2C5.6%2C1c3.3%2C0%2C6.6-1.4%2C9.4-3.9l5%2C7.5C419.8%2C72.9%2C417.3%2C73.9%2C414.1%2C73.9z%20M394.2%2C73.4c-4.5%2C0-7.1%2C2.5-7.1%2C6.7c0%2C4.6%2C2.8%2C6.5%2C7%2C6.5c4.7%2C0%2C7.3-2.3%2C7.3-6.5C401.4%2C75.9%2C398.8%2C73.4%2C394.2%2C73.4z%22%2F%3E%3Cpath%20d%3D%22M458.7%2C105.6c-3.5%2C3.9-8%2C6.3-15%2C6.3c-12.3%2C0-20.4-9.2-20.4-23.5s8.1-23.7%2C20.4-23.7c6.5%2C0%2C11.5%2C2.2%2C15.4%2C6.8c3.6%2C4.2%2C5.2%2C9.2%2C5.2%2C16.6C464.3%2C95.8%2C462.6%2C101.1%2C458.7%2C105.6z%20M449%2C75.8c-1.2-1.5-3-2.4-5.1-2.4c-2.8%2C0-5.1%2C1.8-6.1%2C4.6c-0.8%2C2.4-1.2%2C5.6-1.2%2C10.1c0%2C5.2%2C0.5%2C9.1%2C1.5%2C11.4c1.1%2C2.5%2C3.7%2C3.7%2C6%2C3.7c5.1%2C0%2C7.3-4.6%2C7.3-15.3C451.4%2C81.8%2C450.6%2C77.9%2C449%2C75.8z%22%2F%3E%3Cpath%20d%3D%22M488.4%2C112.3c-5.6%2C0-11.7-1.8-18.3-5.2l4.2-8.7c3.6%2C2.2%2C9.9%2C5.1%2C15%2C5.1c3.4%2C0%2C6-2.2%2C6-5.1c0-3.1-2.2-4.7-7-5.6l-5.3-1c-3-0.5-6.7-2.7-8.3-4.6c-1.6-1.9-2.6-5.2-2.6-8.1c0-8.9%2C7-14.8%2C17.5-14.8c7.3%2C0%2C12%2C2.2%2C16.2%2C4.2l-3.9%2C8c-4.5-2.3-7.8-3.3-11.2-3.3c-3.5%2C0-5.8%2C1.8-5.8%2C4.4c0%2C2.3%2C1.5%2C3.5%2C5.7%2C4.6l5.5%2C1.4c5.6%2C1.4%2C7.4%2C3.1%2C9%2C5.1c1.7%2C2.1%2C2.5%2C4.7%2C2.5%2C7.7C507.8%2C105.9%2C500%2C112.3%2C488.4%2C112.3z%22%2F%3E%3C%2Fg%3E%3Ccircle%20class%3D%22st0%22%20cx%3D%2289.6%22%20cy%3D%2289.6%22%20r%3D%2240.1%22%2F%3E%3Cpath%20d%3D%22M98.6%2C81.7l-1.9-1.3l-7-5.2c-7.1-5.2-8.2-8.7-8.2-13.5c0%2C0%2C0-0.1%2C0-0.1c1.8%2C2%2C4.4%2C3.3%2C8%2C3.3c6.6%2C0%2C11.2-4.9%2C11.2-11.3c0-0.9-0.1-1.7-0.3-2.5c8.8%2C2%2C13.9%2C6.6%2C16.2%2C8.7c0-8.6%2C0.9-18.4%2C1.3-20c-1.1%2C0-4.1-0.4-9.3-1.2c-3.6-0.7-8.1-1.2-13.8-1.2c-20.2%2C0-32.4%2C12.9-32.4%2C28.3c0%2C9.9%2C3.4%2C19.5%2C18.7%2C29.2l1.3%2C0.8l7.2%2C4.8c8.5%2C5.9%2C10.3%2C9.8%2C10.3%2C15.1c0%2C1.4-0.2%2C2.7-0.5%2C3.9c-1.8-3.6-5.4-6.1-9.9-6.1c-7.8%2C0-11%2C6.3-11%2C11.3c0%2C0.9%2C0.1%2C1.7%2C0.3%2C2.6c-7.7-1.6-14.2-5.7-18.4-10.4c0.1%2C6.9-0.9%2C16.1-1.5%2C18.6c5.3%2C3.6%2C16.6%2C5.8%2C25.5%2C5.8c6.1%2C0%2C15-1.3%2C22.2-5.7c9.7-6.1%2C13.5-16.6%2C13.5-24.7C120.2%2C99.8%2C115.4%2C92.2%2C98.6%2C81.7z%22%2F%3E%3Cpolygon%20class%3D%22st1%22%20points%3D%2289.6%2C69.3%2097.5%2C80.9%20111%2C84.8%20102.4%2C95.8%20102.8%2C109.8%2089.6%2C105.1%2076.5%2C109.8%2076.9%2C95.8%2068.3%2C84.8%2081.8%2C80.9%20%22%2F%3E%3C%2Fsvg%3E">Sunergos (Default)</option>
+                            <option value="">None</option>
+                            <option value="custom">Custom URL</option>
+                        </select>
+                        <input type="url" id="customLogoUrl" placeholder="Enter custom logo URL" class="w-full mt-2" style="display: none;">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-700">Company Country</label>
+                        <select id="companyCountry" class="w-full">
+                            <option value="">Select country</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-700">Customer Country</label>
+                        <select id="customerCountry" class="w-full">
+                            <option value="">Select country</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <label class="flex items-center text-sm font-medium text-gray-700">
+                            <input type="checkbox" id="reverseCharge">
+                            Reverse-Charge VAT
+                            <span id="reverseChargeNote" class="ml-1 text-xs text-gray-500" style="display: none;">(Auto-applied for B2B cross-border EU)</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="mt-6 text-center">
+                    <button type="button" id="printBtn" class="btn-primary btn-large">
+                        Print / Export as PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Invoice -->
+            <div class="invoice-container bg-white p-6 sm:p-8 md:p-12 shadow-lg rounded-lg border border-gray-200">
+                <header class="flex flex-col sm:flex-row justify-between items-start mb-8 sm:mb-12 space-y-6 sm:space-y-0">
+                    <div class="w-full sm:w-1/2">
+                        <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">Invoice</h1>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm max-w-xs">
+                            <strong class="text-gray-600">Invoice number</strong>
+                            <input type="text" id="invoiceNumber" placeholder="INV-0001" value="0001">
+
+                            <strong class="text-gray-600">Date of issue</strong>
+                            <input type="date" id="issueDate">
+                            
+                            <strong class="text-gray-600">Date due</strong>
+                            <input type="date" id="dueDate">
+                        </div>
+                    </div>
+                    <div class="w-full sm:w-1/2 flex justify-start sm:justify-end">
+                        <img id="companyLogoImg" src="/assets/git-digest-logo.png" alt="Company Logo" style="max-height: 50px; width: auto;" class="max-w-[150px] sm:max-w-[200px]">
+                    </div>
+                </header>
+                
+                <section class="flex flex-col sm:flex-row justify-between mb-8 sm:mb-12 space-y-6 sm:space-y-0">
+                    <div class="w-full sm:w-1/2 sm:pr-8">
+                        <input type="text" id="companyName" placeholder="Your Company Name" class="font-bold" value="Sunergos IT LLC">
+                        <textarea id="companyAddress" placeholder="123 Business St\nSuite 100\nCity, State 12345\nCountry\nemail@company.com" rows="5" class="text-sm mt-2 editable-textarea">Undeva 9
+Timisoara, Timis, 300001
+Romania
+support@gitdigest.ai</textarea>
+                    </div>
+                    <div class="w-full sm:w-1/2 sm:pl-8">
+                        <h2 class="text-sm font-semibold text-gray-500 mb-2">Bill to</h2>
+                        <input type="text" id="customerName" placeholder="Client Company Name" class="font-bold" value="Acme Inc.">
+                        <textarea id="customerAddress" placeholder="456 Client Ave\nFloor 5\nCity, State 67890\nCountry\nclient@email.com" rows="5" class="text-sm mt-2 editable-textarea">123 Main St
+Manhattan, NY 10001
+United States
+jdoe@acme.com</textarea>
+                        <input type="text" id="customerVat" placeholder="VAT Number (e.g., DE123456789)" class="text-sm mt-2" style="display: none;">
+                    </div>
+                </section>
+
+                <section class="mb-8 sm:mb-12">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2 break-words" id="totalDue">US$500.00 due</h2>
+                </section>
+
+                <!-- Items table -->
+                <section class="overflow-x-auto -mx-6 sm:-mx-8 md:-mx-12 px-6 sm:px-8 md:px-12">
+                    <table class="w-full text-left min-w-[600px]">
+                        <thead>
+                            <tr class="border-b border-gray-400 text-xs sm:text-sm text-gray-600">
+                                <th class="p-1 sm:p-2 pb-2 sm:pb-3 font-semibold w-2/5 sm:w-1/2">Description</th>
+                                <th class="p-1 sm:p-2 pb-2 sm:pb-3 font-semibold text-right">Qty</th>
+                                <th class="p-1 sm:p-2 pb-2 sm:pb-3 font-semibold text-right">Unit price</th>
+                                <th class="p-1 sm:p-2 pb-2 sm:pb-3 font-semibold text-right">Tax</th>
+                                <th class="p-1 sm:p-2 pb-2 sm:pb-3 font-semibold text-right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                            <!-- Items will be rendered here -->
+                        </tbody>
+                    </table>
+                    <div class="no-print mt-4">
+                        <button id="addItemBtn" class="btn-link">+ Add item</button>
+                    </div>
+                </section>
+
+                <!-- Totals -->
+                <section class="flex justify-end mt-6 sm:mt-8">
+                    <div class="w-full sm:w-1/2 max-w-xs text-xs sm:text-sm">
+                        <div class="flex justify-between py-2 border-b">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span class="text-gray-800" id="subtotal">US$500.00</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b">
+                            <span class="text-gray-600">Tax (<span id="taxRate">0</span>%)</span>
+                            <span class="text-gray-800" id="taxAmount">US$0.00</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b">
+                            <span class="text-gray-600">Total</span>
+                            <span class="text-gray-800" id="total">US$500.00</span>
+                        </div>
+                        <div class="flex justify-between py-2 sm:py-3 font-bold text-sm sm:text-base">
+                            <span class="text-gray-600">Amount due</span>
+                            <span class="text-gray-800" id="amountDue">US$500.00</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Notes -->
+                <section class="mt-8 sm:mt-12">
+                    <textarea id="notes" placeholder="Additional notes, payment terms, or special instructions..." rows="4" class="text-sm editable-textarea w-full"></textarea>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="form.js"></script>
+</body>
+</html>

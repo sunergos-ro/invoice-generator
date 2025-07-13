@@ -4,54 +4,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Next.js 15.3.5 application designed for generating Stripe invoices. The project uses TypeScript, React 19, and Tailwind CSS v4.
+This is a plain HTML, CSS, and JavaScript application designed for generating Stripe invoices. The application can be hosted on Cloudflare Pages or any static web hosting service.
 
-## Development Commands
+## Development & Deployment
 
-```bash
-# Install dependencies
-npm install
+This is a static HTML application that requires no build process:
 
-# Run development server (uses Turbopack for faster builds)
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm run start
-
-# Run linting
-npm run lint
-```
+- **Local Development**: Simply open `form.html` in a web browser or use a local web server
+- **Deployment**: Upload all files to any static hosting service (Cloudflare Pages, GitHub Pages, Netlify, or any VPS)
+- **Files Required**:
+  - `form.html` - Main HTML file
+  - `form.css` - Stylesheet
+  - `form.js` - JavaScript functionality
+  - `/images/git-digest-logo.png` - Logo asset (if using Git Digest logo)
 
 ## Architecture and Structure
 
-### Directory Layout
+### File Structure
 ```
-src/app/              # Next.js App Router pages and layouts
-├── layout.tsx        # Root layout with Geist fonts
-├── page.tsx          # Home page with invoice generator
-└── globals.css       # Global styles with Tailwind CSS
-
-src/stores/           # Zustand state management
-└── invoiceStore.ts   # Business and client entity management
-
-public/               # Static assets (SVG icons)
+/
+├── form.html         # Main invoice generator HTML
+├── form.css          # Tailwind-inspired CSS styles
+├── form.js           # JavaScript for invoice functionality
+├── images/
+│   ├── git-digest-logo.png  # Git Digest logo
+├── stylesheets/
+│   ├── common.css         # Common styles shared between pages
+│   └── form.css           # Form-specific styles
+└── javascript/
+    └── form.js            # JavaScript functionality
 ```
 
 ### Key Technologies
-- **Next.js 15.3.5** with App Router
-- **React 19.0.0** 
-- **TypeScript 5** with strict mode
-- **Tailwind CSS v4** (uses CSS-based configuration)
-- **Turbopack** for development builds
-- **Zustand** for state management with localStorage persistence
-
-### TypeScript Configuration
-- Path alias: `@/*` maps to `./src/*`
-- Strict mode enabled
-- Target: ES2017
+- **Plain HTML5**
+- **Vanilla JavaScript** (ES6+)
+- **CSS3** with Tailwind-inspired utility classes
+- **localStorage** for data persistence
+- **No dependencies** or build process required
 
 ## Important Notes
 
@@ -63,10 +52,14 @@ public/               # Static assets (SVG icons)
    - Persistent storage via Zustand and localStorage
    - Support for multiple businesses and clients
 
-3. **No Testing Framework**: Currently no testing setup. Consider adding Jest or Vitest when implementing features.
+3. **Security**: The application includes security headers and avoids inline JavaScript for better CSP compliance.
 
-4. **Environment Variables**: No `.env` files exist yet. When adding Stripe integration, create `.env.local` for API keys.
+4. **Hosting**: Can be deployed to:
+   - Cloudflare Pages (recommended for security features)
+   - GitHub Pages
+   - Netlify
+   - Any static web server or VPS
 
-5. **Tailwind CSS v4**: This project uses the latest Tailwind version which uses CSS-based configuration instead of a JavaScript config file.
+5. **Browser Compatibility**: Works on all modern browsers that support ES6+ JavaScript.
 
-6. **Type Safety**: Always maintain TypeScript strict mode compliance when adding new code.
+6. **No Backend Required**: Runs entirely in the browser with localStorage for persistence.

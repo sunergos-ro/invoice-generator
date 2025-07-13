@@ -1,6 +1,6 @@
 # Stripe Invoice Generator
 
-A simple, free invoice generator for Stripe one-time payments built with Next.js. This project was born out of frustration with having to manually create invoices for Stripe payments and not wanting to pay for external services so I pretty much vibe coded this with Claude Code inspired by [@levelsio's Stripe invoice generator](https://gist.github.com/levelsio/b30721cc99166223fcf3dd590d6d0454).
+A simple, free invoice generator for Stripe one-time payments built with plain HTML, CSS, and JavaScript. This project was born out of frustration with having to manually create invoices for Stripe payments and not wanting to pay for external services so I pretty much vibe coded this with Claude Code inspired by [@levelsio's Stripe invoice generator](https://gist.github.com/levelsio/b30721cc99166223fcf3dd590d6d0454).
 
 > [!NOTE]
 > Stripe now offers post-payment invoice generation for one-time payments, but it's not free. It costs 0.4% of the transaction's total up to a maximum of $2 per invoice. [Learn more about Stripe's pricing for post-payment invoices](https://support.stripe.com/questions/pricing-for-post-payment-invoices-for-one-time-purchases-via-checkout-and-payment-links).
@@ -9,9 +9,22 @@ A simple, free invoice generator for Stripe one-time payments built with Next.js
 
 [![Watch the video](https://img.youtube.com/vi/Hwarc6oYa-o/0.jpg)](https://youtu.be/Hwarc6oYa-o)
 
-## Deploy to Vercel
+## Deployment Options
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sunergos-ro/invoice-generator)
+### Cloudflare Pages (Recommended)
+1. Fork this repository
+2. Connect your GitHub account to Cloudflare Pages
+3. Create a new project and select your forked repository
+4. Deploy directly - no build command needed!
+
+### GitHub Pages
+1. Fork this repository
+2. Go to Settings > Pages
+3. Select "Deploy from a branch" and choose main branch
+4. Access your invoice generator at `https://[username].github.io/invoice-generator/form.html`
+
+### Any Static Host or VPS
+Simply upload all files (`index.html`, `form.html`, `form.css`, `form.js`, and any logo files) to your web server.
 
 ## Features
 
@@ -38,14 +51,17 @@ git clone https://github.com/sunergos-ro/invoice-generator.git
 # Navigate to the project directory
 cd invoice-generator
 
-# Install dependencies
-npm install
+# Option 1: Open directly in browser
+# Simply open form.html in your web browser
 
-# Run the development server
-npm run dev
+# Option 2: Use a local web server (Python)
+python -m http.server 8000
+# Open http://localhost:8000/form.html
+
+# Option 3: Use a local web server (Node.js)
+npx http-server
+# Open http://localhost:8080/form.html
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the invoice generator.
 
 ### Usage
 
@@ -69,36 +85,30 @@ The application automatically saves your inputs to localStorage, so your data pe
 
 You can customize the invoice by:
 - Selecting different company logos from the dropdown or providing a custom URL
-- Modifying the default company details in the code
-- Adding new logo options in the `public` folder
-- Adjusting the invoice layout and styling in `src/app/page.tsx`
-- Customizing the print styles for PDF generation
+- Modifying the default company details in `form.js`
+- Adding new logo options by placing them in the root directory
+- Adjusting the invoice layout in `form.html`
+- Customizing styles in `form.css`
+- Modifying print styles for PDF generation in the `@media print` section of `form.css`
 
 ## Development
 
 This project uses:
-- **Next.js 15.3.5** with App Router
-- **React 19.0.0**
-- **TypeScript 5** with strict mode
-- **Tailwind CSS v4**
-- **Turbopack** for fast development builds
-- **Zustand** for state management
+- **Plain HTML5** - No framework dependencies
+- **Vanilla JavaScript (ES6+)** - No transpilation needed
+- **CSS3** with Tailwind-inspired utility classes
+- **localStorage** for data persistence
+- **Zero build process** - Just edit and refresh!
 
-### Commands
+### Development Tips
 
-```bash
-# Development
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm run start
-
-# Run linting
-npm run lint
-```
+- The application works entirely in the browser
+- All data is stored in localStorage
+- No server or backend required
+- Works offline once loaded
+- Modify `form.js` to change default values and behavior
+- Edit `form.css` to customize styling
+- Add security headers via your hosting provider (e.g., Cloudflare)
 
 ## Contributing
 
