@@ -1,6 +1,6 @@
-# Stripe Invoice Generator
+# One-off Invoice Generator
 
-A simple, free invoice generator for Stripe one-time payments built with plain HTML, CSS, and JavaScript. This project was born out of frustration with having to manually create invoices for Stripe payments and not wanting to pay for external services so I pretty much vibe coded this with Claude Code inspired by [@levelsio's Stripe invoice generator](https://gist.github.com/levelsio/b30721cc99166223fcf3dd590d6d0454).
+A simple, free invoice generator for payments received from clients built with plain HTML, CSS, and JavaScript. This project was born out of frustration with having to manually create invoices for Stripe payments and not wanting to pay for external services so I pretty much vibe coded this with Claude Code inspired by [@levelsio's Stripe invoice generator](https://gist.github.com/levelsio/b30721cc99166223fcf3dd590d6d0454).
 
 > [!NOTE]
 > Stripe now offers post-payment invoice generation for one-time payments, but it's not free. It costs 0.4% of the transaction's total up to a maximum of $2 per invoice. [Learn more about Stripe's pricing for post-payment invoices](https://support.stripe.com/questions/pricing-for-post-payment-invoices-for-one-time-purchases-via-checkout-and-payment-links).
