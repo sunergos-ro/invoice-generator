@@ -259,7 +259,7 @@ const EU_VAT_RATES = {
   "CY": { standard: 19, countryCode: "CY" }, // Cyprus
   "CZ": { standard: 21, countryCode: "CZ" }, // Czech Republic
   "DK": { standard: 25, countryCode: "DK" }, // Denmark
-  "EE": { standard: 22, countryCode: "EE" }, // Estonia
+  "EE": { standard: 24, countryCode: "EE" }, // Estonia
   "FI": { standard: 25.5, countryCode: "FI" }, // Finland
   "FR": { standard: 20, countryCode: "FR" }, // France
   "DE": { standard: 19, countryCode: "DE" }, // Germany
