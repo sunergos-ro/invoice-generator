@@ -274,7 +274,7 @@ const EU_VAT_RATES = {
   "NL": { standard: 21, countryCode: "NL" }, // Netherlands
   "PL": { standard: 23, countryCode: "PL" }, // Poland
   "PT": { standard: 23, countryCode: "PT" }, // Portugal
-  "RO": { standard: 19, countryCode: "RO" }, // Romania
+  "RO": { standard: 21, countryCode: "RO" }, // Romania
   "SK": { standard: 23, countryCode: "SK" }, // Slovakia
   "SI": { standard: 22, countryCode: "SI" }, // Slovenia
   "ES": { standard: 21, countryCode: "ES" }, // Spain
