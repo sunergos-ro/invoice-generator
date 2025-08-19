@@ -348,6 +348,11 @@ function saveToStorage() {
   }));
 }
 
+function formatCurrency(number) {
+    if (number === null || number === undefined || isNaN(number)) return "$0.00";
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(number));
+}
+
 // Update UI from state
 function updateUI() {
   // Update form fields
@@ -483,21 +488,36 @@ function getApplicableVATRate() {
 
 // Calculate totals
 function updateTotals() {
-  const subtotal = state.invoiceData.items.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
+  const subtotal = state.invoiceData.items.reduce((acc, item) => {
+      const quantity = Number(item.quantity) || 0;
+      const unitPrice = Number(item.unitPrice) || 0;
+      return acc + (quantity * unitPrice);
+  }, 0);
+  
   const taxRate = getApplicableVATRate();
   const taxAmount = subtotal * (taxRate / 100);
   const total = subtotal + taxAmount;
 
-  document.getElementById('subtotal').textContent = `US$${subtotal.toFixed(2)}`;
-  document.getElementById('taxRate').textContent = taxRate;
-  document.getElementById('taxAmount').textContent = `US$${taxAmount.toFixed(2)}`;
-  document.getElementById('total').textContent = `US$${total.toFixed(2)}`;
-  document.getElementById('amountDue').textContent = `US$${total.toFixed(2)}`;
+  // Update DOM elements with proper null checks
+  const subtotalEl = document.getElementById('subtotal');
+  const taxRateEl = document.getElementById('taxRate');
+  const taxAmountEl = document.getElementById('taxAmount');
+  const totalEl = document.getElementById('total');
+  const amountDueEl = document.getElementById('amountDue');
+  const totalDueEl = document.getElementById('totalDue');
+
+  if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
+  if (taxRateEl) taxRateEl.textContent = taxRate;
+  if (taxAmountEl) taxAmountEl.textContent = formatCurrency(taxAmount);
+  if (totalEl) totalEl.textContent = formatCurrency(total);
+  if (amountDueEl) amountDueEl.textContent = formatCurrency(total);
 
   // Update due date text
-  const dueDate = new Date(state.invoiceData.dueDate);
-  const dueDateText = dueDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-  document.getElementById('totalDue').innerHTML = `US$${total.toFixed(2)} due ${dueDateText}`;
+  if (totalDueEl) {
+      const dueDate = new Date(state.invoiceData.dueDate);
+      const dueDateText = dueDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+      totalDueEl.innerHTML = `${formatCurrency(total)} due ${dueDateText}`;
+  }
 }
 
 // Items management
@@ -509,7 +529,10 @@ function renderItems() {
   const isEUCustomer = EU_COUNTRY_CODES.includes(state.invoiceData.customerCountry);
 
   state.invoiceData.items.forEach((item, index) => {
-      const itemTotal = item.quantity * item.unitPrice;
+      const quantity = Number(item.quantity) || 0;
+      const unitPrice = Number(item.unitPrice) || 0;
+      const itemTotal = quantity * unitPrice;
+      
       const tr = document.createElement('tr');
       tr.className = 'border-b border-gray-200';
       tr.innerHTML = `
@@ -517,15 +540,15 @@ function renderItems() {
               <textarea data-item-id="${item.id}" data-field="description" placeholder="Product or service description\nAdd details here..." class="text-sm editable-textarea">${item.description}</textarea>
           </td>
           <td class="p-1 sm:p-2 align-top text-right">
-              <input type="number" data-item-id="${item.id}" data-field="quantity" value="${item.quantity}" placeholder="1" class="w-12 sm:w-16 text-right text-xs sm:text-base">
+              <input type="number" data-item-id="${item.id}" data-field="quantity" value="${quantity}" placeholder="1" class="w-12 sm:w-16 text-right text-xs sm:text-base">
           </td>
           <td class="p-1 sm:p-2 align-top text-right">
-              <input type="number" data-item-id="${item.id}" data-field="unitPrice" value="${item.unitPrice}" placeholder="0.00" step="0.01" class="w-16 sm:w-24 text-right text-xs sm:text-base">
+              <input type="number" data-item-id="${item.id}" data-field="unitPrice" value="${unitPrice}" placeholder="0.00" step="0.01" class="w-16 sm:w-24 text-right text-xs sm:text-base">
           </td>
           <td class="p-1 sm:p-2 align-top text-right text-xs sm:text-sm text-gray-600">
               ${shouldApplyVAT() ? `${taxRate}%` : (isEUCustomer && state.invoiceData.isReverseCharge ? '0%<sup>[1]</sup>' : '0%')}
           </td>
-          <td class="p-1 sm:p-2 align-top text-right text-xs sm:text-sm text-gray-800">US$${itemTotal.toFixed(2)}</td>
+          <td class="p-1 sm:p-2 align-top text-right text-xs sm:text-sm text-gray-800">${formatCurrency(itemTotal)}</td>
           ${index > 0 ? `<td class="p-1 sm:p-2 align-top text-right no-print"><button onclick="removeItem('${item.id}')" class="btn-remove">&times;</button></td>` : '<td></td>'}
       `;
       tbody.appendChild(tr);
@@ -536,7 +559,7 @@ function renderItems() {
       el.addEventListener('input', (e) => {
           const itemId = e.target.dataset.itemId;
           const field = e.target.dataset.field;
-          const value = field === 'description' ? e.target.value : parseFloat(e.target.value) || 0;
+          const value = field === 'description' ? e.target.value : (parseFloat(e.target.value) || 0);
           
           // Update the item in state
           state.invoiceData.items = state.invoiceData.items.map(item =>
@@ -547,12 +570,14 @@ function renderItems() {
           if (field === 'quantity' || field === 'unitPrice') {
               const item = state.invoiceData.items.find(item => item.id === itemId);
               if (item) {
-                  const itemTotal = item.quantity * item.unitPrice;
+                  const quantity = Number(item.quantity) || 0;
+                  const unitPrice = Number(item.unitPrice) || 0;
+                  const itemTotal = quantity * unitPrice;
                   // Find the amount cell for this item and update it
                   const row = e.target.closest('tr');
                   const amountCell = row.querySelector('td:nth-last-child(2)');
                   if (amountCell) {
-                      amountCell.textContent = `US$${itemTotal.toFixed(2)}`;
+                      amountCell.textContent = formatCurrency(itemTotal);
                   }
               }
           }
